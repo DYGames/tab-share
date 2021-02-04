@@ -1,0 +1,9 @@
+.Auth {
+    display: flex;
+    justify-content: right;
+}
+
+.Auth a {
+    margin-left: 20px;
+    text-decoration: none;
+}

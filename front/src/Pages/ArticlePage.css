@@ -1,0 +1,28 @@
+.ArticlePageMeta {
+    border-bottom: 1px solid rgb(228, 230, 232);
+    height: 25px;
+    margin: 0 40px 0 40px;
+}
+
+.ArticlePageMeta span {
+    color: rgb(106, 115, 124);
+}
+
+.ArticlePageMeta p {
+    display: inline;
+    margin: 0 0 0 0;
+}
+
+.ArticleContent {
+    margin: 0 40px 0 40px;
+    min-height: 30vh;
+}
+
+.ArticleOptions {
+    margin-right: 40px;
+}
+
+.ArticleOptions form {
+    float: right;
+    margin-left: 10px;
+}

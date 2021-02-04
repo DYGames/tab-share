@@ -1,0 +1,26 @@
+.WriteArticlePage {
+    width: 100%;
+}
+
+#Title {
+    width: calc(75% + 40px - 3px);
+    height: 20px;
+    margin: 1px 0 0 40px;
+}
+
+#User {
+    width: calc(15% - 3px);
+    height: 20px;
+    margin: 5px 0 0 0;
+}
+
+#Content {
+    width: calc(90% + 40px);
+    min-height: 500px;
+    margin: 5px 40px 0 40px;
+    vertical-align: top;
+}
+
+.SubmitArticle {
+    margin: 5px calc(40px + 6px) 0 0;
+}
