@@ -3,13 +3,13 @@ import {
     Route,
     Switch
 } from "react-router-dom"
-import IndexPage from "../Pages/IndexPage"
-import ArticlePage from "../Pages/ArticlePage"
-import WriteArticlePage from "../Pages/WriteArticlePage"
-import LoginPage from "../Pages/LoginPage"
-import SignUpPage from "../Pages/SignUpPage"
-import UserInfoPage from "../Pages/UserInfoPage"
-import PlayerPage from "../Pages/PlayerPage"
+import IndexPage from "../../Pages/IndexPage"
+import ArticlePage from "../../Pages/ArticlePage"
+import WriteArticlePage from "../../Pages/WriteArticlePage"
+import LoginPage from "../../Pages/LoginPage"
+import SignUpPage from "../../Pages/SignUpPage"
+import UserInfoPage from "../../Pages/UserInfoPage"
+import PlayerPage from "../../Pages/PlayerPage"
 
 class Main extends React.Component {
     render() {
