@@ -2,7 +2,7 @@ import React from "react"
 import { Link } from "react-router-dom"
 import "whatwg-fetch"
 import logo from "../logo.svg"
-import Button from "../Components/Button"
+import Button from "../Components/UI/Button"
 
 class ArticleIndex extends React.Component {
     render() {

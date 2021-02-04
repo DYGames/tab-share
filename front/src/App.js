@@ -2,9 +2,9 @@ import React from "react";
 import "./App.css";
 import { BrowserRouter } from "react-router-dom"
 import "whatwg-fetch"
-import Header from "./Components/Header"
-import Navigator from "./Components/Navigator"
-import Content from "./Components/Content"
+import Header from "./Components/UI/Header"
+import Navigator from "./Components/UI/Navigator"
+import Content from "./Components/UI/Content"
 
 class App extends React.Component {
     constructor(props, context, updater) {

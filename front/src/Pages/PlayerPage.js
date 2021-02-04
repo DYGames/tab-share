@@ -1,6 +1,7 @@
 import React from "react"
 import MIDI from "midi.js"
 import styled from "styled-components";
+import ReadTabFile from "../Logic/Tablature/ReadTabFile";
 
 export default class PlayerPage extends React.Component {
     constructor(props, context, updater) {
@@ -13,6 +14,7 @@ export default class PlayerPage extends React.Component {
     }
 
     componentDidMount() {
+        ReadTabFile.read("http://localhost:3001/public/tab.tab");
         //this.loadPlugin();
     }
 

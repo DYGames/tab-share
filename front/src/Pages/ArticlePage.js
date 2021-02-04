@@ -1,7 +1,7 @@
 import React from "react"
 import "./ArticlePage.css";
 import "whatwg-fetch"
-import Button from "../Components/Button"
+import Button from "../Components/UI/Button"
 import { withRouter } from "react-router-dom";
 
 class ArticlePage extends React.Component {

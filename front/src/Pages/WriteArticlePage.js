@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "../Components/Button"
+import Button from "../Components/UI/Button"
 import "./WriteArticlePage.css";
 import { withRouter } from "react-router-dom";
 import "whatwg-fetch"
