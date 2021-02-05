@@ -11,11 +11,7 @@ export default class PlayerPage extends React.Component {
         }
 
         this.loadPlugin = this.loadPlugin.bind(this);
-    }
-
-    componentDidMount() {
-        ReadTabFile.read("http://localhost:3001/public/tab.tab");
-        //this.loadPlugin();
+        this.playNote = this.playNote.bind(this);
     }
 
     loadPlugin(inst, chan) {
@@ -41,6 +37,32 @@ export default class PlayerPage extends React.Component {
         MIDI.noteOff(chan, MIDI.keyToNote[key], delay + 0.75);
     }
 
+    stopNote(chan) {
+        MIDI.setVolume(chan, 0);
+    }
+
+    playSheet(sheet) {
+        for (let i = 0; i < sheet.bars.length; i++) {
+            let idx = 0;
+            (function note(j) {
+                let tempo = 0;
+                for (; j < sheet.bars[i].notes.length; j++) {
+                    if (sheet.bars[i].notes[j].index === idx) {
+                        tempo = sheet.bars[i].notes[j].tempo;
+                        if (tempo > 4)
+                            this.stopNote(0);
+                        else
+                            this.playNote(sheet.bars[i].notes[j].note, 0);
+                    }
+                    else
+                        break;
+                }
+                idx++;
+                setTimeout(note.bind(this), 1000 / tempo, j);
+            }.bind(this)(0));
+        }
+    }
+
     render() {
         const Button = styled.button`
             float: left;
@@ -54,7 +76,12 @@ export default class PlayerPage extends React.Component {
         return (
             <div>
                 <Div>
-                    <Button onClick={() => { this.loadPlugin("acoustic_grand_piano", 0); }}>Piano</Button>
+                    <Button onClick={() => {
+                        this.loadPlugin("acoustic_grand_piano", 0);
+                    }}>Piano</Button>
+                    <Button onClick={() => {
+                        ReadTabFile.read("http://localhost:3001/public/tab.tab").then((sheet) => { this.playSheet(sheet); });
+                    }}>Sheet</Button>
                     <Button onClick={() => { this.playNote("C2", 0); }}>C2</Button>
                     <Button onClick={() => { this.playNote("Db2", 0); }}>Db2</Button>
                     <Button onClick={() => { this.playNote("D2", 0); }}>D2</Button>
