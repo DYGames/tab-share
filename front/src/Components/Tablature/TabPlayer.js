@@ -4,6 +4,29 @@ import SheetPlayer from "../../Logic/Tablature/SheetPlayer"
 import ReadTabFile from "../../Logic/Tablature/ReadTabFile"
 
 export default class TabPlayer extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.playerRef = React.createRef();
+    }
+
+    componentDidMount() {
+        this.ctx = this.playerRef.current.getContext('2d');
+        this.ctx.font = '16pt Consolas';
+        this.ctx.beginPath();
+        this.ctx.moveTo(20, 20);
+        this.ctx.lineTo(20, 120);
+        this.ctx.moveTo(780, 20);
+        this.ctx.lineTo(780, 120);
+        for (let i = 0; i < 6; i++) {
+            this.ctx.moveTo(0, 20 * (i + 1));
+            this.ctx.lineTo(800, 20 * (i + 1));
+        }
+        this.ctx.closePath();
+        this.ctx.stroke();
+
+    }
+
     render() {
         const Button = styled.button`
             float: left;
@@ -16,12 +39,42 @@ export default class TabPlayer extends React.Component {
 
         return (
             <div>
+                <canvas width={800} height={150} ref={this.playerRef} />
                 <Div>
                     <Button onClick={() => {
                         SheetPlayer.loadPlugin("distortion_guitar", 2);
                     }}>Guitar</Button>
                     <Button onClick={() => {
-                        ReadTabFile.read("http://localhost:3001/public/tab.tab").then((sheet) => { SheetPlayer.playSheet(sheet, 2); });
+                        ReadTabFile.read("http://localhost:3001/public/tab.tab").then((sheet) => {
+                            let idx = -1, delta = 0;
+                            for (let i = 0; i < sheet.bars.length; i++) {
+                                for (let j = 0; j < sheet.bars[i].notes.length; j++) {
+                                    if (sheet.bars[i].notes[j].index !== idx) {
+                                        let tempo = sheet.bars[i].notes[j].tempo;
+                                        if (tempo === 0 || tempo === 5)
+                                            delta += (800 - 40) / 1;
+                                        else if (tempo === 1 || tempo === 6)
+                                            delta += (800 - 40) / 2;
+                                        else if (tempo === 2 || tempo === 7)
+                                            delta += (800 - 40) / 4;
+                                        else if (tempo === 3 || tempo === 8)
+                                            delta += (800 - 40) / 8;
+                                        else if (tempo === 4 || tempo === 9)
+                                            delta += (800 - 40) / 16;
+                                    }
+                                    idx = sheet.bars[i].notes[j].index;
+                                    let fret = sheet.bars[i].notes[j].fret;
+                                    if (fret === 110) continue;
+                                    else if (fret === 120) fret = 'x';
+                                    let y = 20 * sheet.bars[i].notes[j].string;
+                                    this.ctx.fillStyle = '#FFFFFF';
+                                    this.ctx.fillRect(delta - 20, y - 2, 12, 4);
+                                    this.ctx.fillStyle = '#000000';
+                                    this.ctx.fillText(`${fret}`, delta - 20, y + (16 / 2));
+                                }
+                            }
+                            SheetPlayer.playSheet(sheet, 2);
+                        });
                     }}>Sheet</Button>
                 </Div>
                 <Div>
