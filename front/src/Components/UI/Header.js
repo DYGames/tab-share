@@ -48,7 +48,7 @@ class Header extends React.Component {
                 <p>이거 핑까점</p>
                 <SearchBar></SearchBar>
                 {auth}
-                <Link to="/Player"><p>Player</p></Link>
+                <Link to="/Player" className="Player"><p>Player</p></Link>
             </div>
         );
     }
