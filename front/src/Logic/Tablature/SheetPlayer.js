@@ -1,4 +1,3 @@
-import ReadTabFile from "../../Logic/Tablature/ReadTabFile";
 import MIDI from "midi.js"
 
 export default class SheetPlayer {
@@ -22,30 +21,25 @@ export default class SheetPlayer {
 
     static playSheet(sheet, chan) {
         for (let i = 0; i < sheet.bars.length; i++) {
-            let idx = 0;
-            (function note(j) {
+            (function chord(j) {
                 let tempo = 0;
                 let delay = 0;
-                for (; j < sheet.bars[i].notes.length; j++) {
-                    if (sheet.bars[i].notes[j].index === idx) {
-                        tempo = sheet.bars[i].notes[j].tempo;
-                        if (tempo === 0 || tempo === 5)
-                            delay = (60000 / sheet.bpm) * 4;
-                        else if (tempo === 1 || tempo === 6)
-                            delay = (60000 / sheet.bpm) * 2;
-                        else if (tempo === 2 || tempo === 7)
-                            delay = (60000 / sheet.bpm);
-                        else if (tempo === 3 || tempo === 8)
-                            delay = (60000 / sheet.bpm) / 2;
-                        else if (tempo === 4 || tempo === 9)
-                            delay = (60000 / sheet.bpm) / 4;
-                        this.playNote(sheet.bars[i].notes[j].note, chan, delay);
-                    }
-                    else
-                        break;
+                for (let k = 0; k < sheet.bars[i].chords[j].notes.length; k++) {
+                    tempo = sheet.bars[i].chords[j].notes[k].tempo;
+                    if (tempo === 0 || tempo === 5)
+                        delay = (60000 / sheet.bpm) * 4;
+                    else if (tempo === 1 || tempo === 6)
+                        delay = (60000 / sheet.bpm) * 2;
+                    else if (tempo === 2 || tempo === 7)
+                        delay = (60000 / sheet.bpm);
+                    else if (tempo === 3 || tempo === 8)
+                        delay = (60000 / sheet.bpm) / 2;
+                    else if (tempo === 4 || tempo === 9)
+                        delay = (60000 / sheet.bpm) / 4;
+                    this.playNote(sheet.bars[i].chords[j].notes[k].note, chan, delay);
                 }
-                idx++;
-                setTimeout(note.bind(this), delay, j);
+                if (j + 1 < sheet.bars[i].chords.length)
+                    setTimeout(chord.bind(this), delay, j + 1);
             }.bind(this)(0));
         }
     }

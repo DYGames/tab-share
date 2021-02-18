@@ -8,7 +8,7 @@ class Navigator extends React.Component {
                 <ul>
                     <li>
                         <Link to={"/"}>
-                            자작곡 갤러리
+                            자작곡
                         </Link>
                     </li>
                 </ul>

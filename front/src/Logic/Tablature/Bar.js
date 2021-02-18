@@ -1,5 +1,5 @@
 export default class Bar {
     constructor () {
-        this.notes = [];
+        this.chords = [];
     }
 }

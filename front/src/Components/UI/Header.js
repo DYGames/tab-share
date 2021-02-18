@@ -45,7 +45,7 @@ class Header extends React.Component {
         return (
             <div className="Header">
                 <a className="Logo" href="/"><img src={logo} alt=""></img></a>
-                <p>이거 핑까점</p>
+                <p>tab-share</p>
                 <SearchBar></SearchBar>
                 {auth}
                 <Link to="/Player" className="Player"><p>Player</p></Link>
