@@ -1,5 +1,6 @@
 export default class Bar {
-    constructor () {
+    constructor (index) {
+        this.index = index;
         this.chords = [];
     }
 }

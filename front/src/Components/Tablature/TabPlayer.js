@@ -43,8 +43,8 @@ export default class TabPlayer extends React.Component {
         if (sheet === null)
             return;
         for (let i = 0; i < sheet.bars.length; i++) {
-            this.renderBar(i);
-            let delta = (this.barWidth / 16) + this.barBorder.left;
+            this.renderBarFrame(i);
+            let delta = (this.barWidth * i) + (this.barWidth / 16) + this.barBorder.left;
             for (let j = 0; j < sheet.bars[i].chords.length; j++) {
                 for (let k = 0; k < sheet.bars[i].chords[j].notes.length; k++) {
                     let fret = sheet.bars[i].chords[j].notes[k].fret;
@@ -74,7 +74,7 @@ export default class TabPlayer extends React.Component {
         }
     }
 
-    renderBar(idx) {
+    renderBarFrame(idx) {
         this.ctx.beginPath();
         this.ctx.moveTo(this.barBorder.left + (this.barWidth * idx), this.barBorder.top);
         this.ctx.lineTo(this.barBorder.left + (this.barWidth * idx), this.stringBorder * this.stringCount);
@@ -114,21 +114,23 @@ export default class TabPlayer extends React.Component {
 
     playProgress() {
         this.progress += (10 / ((60000 / this.currentSheet.bpm) * 4)) * this.barWidth;
-        if (this.progress >= this.barWidth) {
-            this.progress = this.barWidth;
+        if (this.progress >= this.barWidth * this.currentSheet.bars.length) {
+            this.progress = this.barWidth * this.currentSheet.bars.length;
             clearInterval(this.progressInterval);
             this.progressInterval = null;
         }
     }
 
     loadPlugin() {
+        if (this.state.isPluginLoaded)
+            return;
         SheetPlayer.loadPlugin("distortion_guitar", 2).then((value) => {
             this.setState({ isPluginLoaded: value });
         });
     }
 
-    loadSheet() {
-        ReadTabFile.read("http://localhost:3001/public/tab.tab").then((sheet) => {
+    loadSheet(url) {
+        ReadTabFile.read(url).then((sheet) => {
             this.currentSheet = sheet;
         });
     }
@@ -164,7 +166,8 @@ export default class TabPlayer extends React.Component {
                 <canvas width={this.sheetSize.width} height={this.sheetSize.height} ref={this.playerRef} />
                 <div style={{ display: "flex" }}>
                     <button onClick={this.loadPlugin.bind(this)}>{this.state.isPluginLoaded ? "Plugin Loaded" : "Load Plugin"}</button>
-                    <button onClick={this.loadSheet.bind(this)}>Load Sheet</button>
+                    <button onClick={this.loadSheet.bind(this, "http://localhost:3001/public/tab.tab")}>Load Sheet1</button>
+                    <button onClick={this.loadSheet.bind(this, "http://localhost:3001/public/stair.tab")}>Load Sheet2</button>
                     <button onClick={this.play.bind(this)}>Play</button>
                     <button onClick={this.pause.bind(this)}>Pause</button>
                     <button onClick={this.stop.bind(this)}>Stop</button>

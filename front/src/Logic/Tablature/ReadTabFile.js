@@ -15,11 +15,15 @@ export default class ReadTabFile {
             let mode = 0;
             let tempo = 0;
             let index = -1;
+            let barIndex = 0;
             let string = 1;
 
-            sheet.bars.push(new Bar());
             for (let i = 0; i < array.length; i++) {
-                if (array[i] === 127) {
+                if(array[i] === 126) {
+                    sheet.bars.push(new Bar(barIndex));
+                    barIndex++;
+                }
+                else if (array[i] === 127) {
                     mode = 1;
                     string = 1;
                     index++;
