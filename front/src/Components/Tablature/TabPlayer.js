@@ -5,6 +5,11 @@ import ReadTabFile from "../../Logic/Tablature/ReadTabFile"
 export default class TabPlayer extends React.Component {
     constructor(props) {
         super(props);
+
+        this.state = {
+            isPluginLoaded: false,
+        }
+
         this.playerRef = React.createRef();
 
         this.sheetSize = {
@@ -117,7 +122,9 @@ export default class TabPlayer extends React.Component {
     }
 
     loadPlugin() {
-        SheetPlayer.loadPlugin("distortion_guitar", 2);
+        SheetPlayer.loadPlugin("distortion_guitar", 2).then((value) => {
+            this.setState({ isPluginLoaded: value });
+        });
     }
 
     loadSheet() {
@@ -127,7 +134,7 @@ export default class TabPlayer extends React.Component {
     }
 
     play() {
-        if (this.currentSheet === null)
+        if (this.currentSheet === null || !this.state.isPluginLoaded)
             return;
 
         if (this.progress === 0)
@@ -156,7 +163,7 @@ export default class TabPlayer extends React.Component {
             <div>
                 <canvas width={this.sheetSize.width} height={this.sheetSize.height} ref={this.playerRef} />
                 <div style={{ display: "flex" }}>
-                    <button onClick={this.loadPlugin.bind(this)}>Load Plugin</button>
+                    <button onClick={this.loadPlugin.bind(this)}>{this.state.isPluginLoaded ? "Plugin Loaded" : "Load Plugin"}</button>
                     <button onClick={this.loadSheet.bind(this)}>Load Sheet</button>
                     <button onClick={this.play.bind(this)}>Play</button>
                     <button onClick={this.pause.bind(this)}>Pause</button>

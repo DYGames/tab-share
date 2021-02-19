@@ -1,15 +1,18 @@
 import MIDI from "midi.js"
 
 export default class SheetPlayer {
-    static loadPlugin(inst, chan) {
-        MIDI.loadPlugin({
-            soundfontUrl: "./soundfont/",
-            instrument: inst,
-            onprogress: function (state, progress) {
-            },
-            onsuccess: function () {
-                MIDI.programChange(chan, MIDI.GM.byName[inst].number);
-            }
+    static async loadPlugin(inst, chan) {
+        return await new Promise(function (resolve, reject) {
+            MIDI.loadPlugin({
+                soundfontUrl: "./soundfont/",
+                instrument: inst,
+                onprogress: function (state, progress) {
+                },
+                onsuccess: function () {
+                    MIDI.programChange(chan, MIDI.GM.byName[inst].number);
+                    resolve(true);
+                }
+            });
         });
     }
 
@@ -22,6 +25,11 @@ export default class SheetPlayer {
     static playSheet(sheet, chan) {
         for (let i = 0; i < sheet.bars.length; i++) {
             (function chord(j) {
+                if (j === -1) {
+                    setTimeout(chord.bind(this), (60000 / sheet.bpm) / 4, j + 1);
+                    return;
+                }
+
                 let tempo = 0;
                 let delay = 0;
                 for (let k = 0; k < sheet.bars[i].chords[j].notes.length; k++) {
@@ -40,7 +48,7 @@ export default class SheetPlayer {
                 }
                 if (j + 1 < sheet.bars[i].chords.length)
                     setTimeout(chord.bind(this), delay, j + 1);
-            }.bind(this)(0));
+            }.bind(this)(-1));
         }
     }
 }
