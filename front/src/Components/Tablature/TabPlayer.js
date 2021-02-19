@@ -23,21 +23,20 @@ export default class TabPlayer extends React.Component {
 
         this.stringBorder = 15;
         this.stringCount = 6;
+        this.currentSheet = null;
+        this.progress = 0;
+        this.progressInterval = null;
     }
 
     componentDidMount() {
         this.ctx = this.playerRef.current.getContext('2d');
         this.ctx.font = '10pt Consolas';
-        this.ctx.beginPath();
-        for (let i = 0; i < this.stringCount; i++) {
-            this.ctx.moveTo(0, this.stringBorder * (i + 1));
-            this.ctx.lineTo(this.sheetSize.width, this.stringBorder * (i + 1));
-        }
-        this.ctx.closePath();
-        this.ctx.stroke();
+        this.canvasRender();
     }
 
     renderSheet(sheet) {
+        if (sheet === null)
+            return;
         for (let i = 0; i < sheet.bars.length; i++) {
             this.renderBar(i);
             let delta = (this.barWidth / 16) + this.barBorder.left;
@@ -80,6 +79,34 @@ export default class TabPlayer extends React.Component {
         this.ctx.stroke();
     }
 
+    renderProgressBar(x) {
+        this.ctx.strokeStyle = '#FF00FF';
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.barBorder.left + x, this.barBorder.top);
+        this.ctx.lineTo(this.barBorder.left + x, this.stringBorder * this.stringCount);
+        this.ctx.closePath();
+        this.ctx.stroke();
+    }
+
+    renderString() {
+        this.ctx.strokeStyle = '#000000';
+        this.ctx.beginPath();
+        for (let i = 0; i < this.stringCount; i++) {
+            this.ctx.moveTo(0, this.stringBorder * (i + 1));
+            this.ctx.lineTo(this.sheetSize.width, this.stringBorder * (i + 1));
+        }
+        this.ctx.closePath();
+        this.ctx.stroke();
+    }
+
+    canvasRender() {
+        this.ctx.clearRect(0, 0, this.sheetSize.width, this.sheetSize.height);
+        this.renderString();
+        this.renderSheet(this.currentSheet);
+        this.renderProgressBar(this.progress);
+        requestAnimationFrame(this.canvasRender.bind(this));
+    }
+
     render() {
         return (
             <div>
@@ -90,8 +117,19 @@ export default class TabPlayer extends React.Component {
                     }}>Guitar</button>
                     <button onClick={() => {
                         ReadTabFile.read("http://localhost:3001/public/tab.tab").then((sheet) => {
-                            this.renderSheet(sheet);
+                            this.currentSheet = sheet;
                             SheetPlayer.playSheet(sheet, 2);
+                            this.progress = 0;
+                            if (this.progressInterval !== null)
+                                clearInterval(this.progressInterval);
+                            this.progressInterval = setInterval(() => {
+                                this.progress += (10 / ((60000 / sheet.bpm) * 4)) * this.barWidth;
+                                if (this.progress >= this.barWidth) {
+                                    this.progress = this.barWidth;
+                                    clearInterval(this.progressInterval);
+                                    this.progressInterval = null;
+                                }
+                            }, 10);
                         });
                     }}>Sheet</button>
                 </div>
