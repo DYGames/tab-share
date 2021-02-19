@@ -107,31 +107,60 @@ export default class TabPlayer extends React.Component {
         requestAnimationFrame(this.canvasRender.bind(this));
     }
 
+    playProgress() {
+        this.progress += (10 / ((60000 / this.currentSheet.bpm) * 4)) * this.barWidth;
+        if (this.progress >= this.barWidth) {
+            this.progress = this.barWidth;
+            clearInterval(this.progressInterval);
+            this.progressInterval = null;
+        }
+    }
+
+    loadPlugin() {
+        SheetPlayer.loadPlugin("distortion_guitar", 2);
+    }
+
+    loadSheet() {
+        ReadTabFile.read("http://localhost:3001/public/tab.tab").then((sheet) => {
+            this.currentSheet = sheet;
+        });
+    }
+
+    play() {
+        if (this.currentSheet === null)
+            return;
+
+        if (this.progress === 0)
+            SheetPlayer.playSheet(this.currentSheet, 2);
+
+        if (this.progressInterval !== null)
+            clearInterval(this.progressInterval);
+
+        this.progressInterval = setInterval(this.playProgress.bind(this), 10);
+    }
+
+    pause() {
+        if (this.progressInterval !== null)
+            clearInterval(this.progressInterval);
+    }
+
+    stop() {
+        this.progress = 0;
+
+        if (this.progressInterval !== null)
+            clearInterval(this.progressInterval);
+    }
+
     render() {
         return (
             <div>
                 <canvas width={this.sheetSize.width} height={this.sheetSize.height} ref={this.playerRef} />
-                <div>
-                    <button onClick={() => {
-                        SheetPlayer.loadPlugin("distortion_guitar", 2);
-                    }}>Guitar</button>
-                    <button onClick={() => {
-                        ReadTabFile.read("http://localhost:3001/public/tab.tab").then((sheet) => {
-                            this.currentSheet = sheet;
-                            SheetPlayer.playSheet(sheet, 2);
-                            this.progress = 0;
-                            if (this.progressInterval !== null)
-                                clearInterval(this.progressInterval);
-                            this.progressInterval = setInterval(() => {
-                                this.progress += (10 / ((60000 / sheet.bpm) * 4)) * this.barWidth;
-                                if (this.progress >= this.barWidth) {
-                                    this.progress = this.barWidth;
-                                    clearInterval(this.progressInterval);
-                                    this.progressInterval = null;
-                                }
-                            }, 10);
-                        });
-                    }}>Sheet</button>
+                <div style={{ display: "flex" }}>
+                    <button onClick={this.loadPlugin.bind(this)}>Load Plugin</button>
+                    <button onClick={this.loadSheet.bind(this)}>Load Sheet</button>
+                    <button onClick={this.play.bind(this)}>Play</button>
+                    <button onClick={this.pause.bind(this)}>Pause</button>
+                    <button onClick={this.stop.bind(this)}>Stop</button>
                 </div>
             </div>);
     }
