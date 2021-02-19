@@ -4,7 +4,10 @@ share your guitar track and collaborate with others!
 ```
 
 ## .tab file spec
-byte 0 : if 127 then index changed  
+```
+byte 0 : index
+127 : note
+126 : bar
 byte 1 : tempo [0-9]  
 0 : whole note  
 1 : half note  
@@ -18,6 +21,7 @@ byte 1 : tempo [0-9]
 9 : sixteenth rest  
 byte 2-7 : string [1-6] fret [0-25] if n then not touch if x then x  
 byte pair : [string] [fret] [E A D G B e] [0-25]
+```
   
 ### example  
 ```
