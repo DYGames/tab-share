@@ -14,7 +14,7 @@ export default class TabPlayer extends React.Component {
 
         this.sheetSize = {
             width: 1300,
-            height: 160
+            height: 800
         };
 
         this.barBorder = {
@@ -31,18 +31,44 @@ export default class TabPlayer extends React.Component {
         this.currentSheet = null;
         this.progress = 0;
         this.progressInterval = null;
-		this.currentChannel = 0;
+        this.currentChannel = 0;
     }
 
     componentDidMount() {
         this.ctx = this.playerRef.current.getContext('2d');
         this.ctx.font = '10pt Consolas';
-        this.canvasRender();
+        this.renderCanvas();
     }
 
-    renderSheet(sheet) {
+    renderCanvas() {
+        this.ctx.clearRect(0, 0, this.sheetSize.width, this.sheetSize.height);
+        this.renderRhythmsTab();
+        this.renderTracksTab();
+        this.renderSheetTab(this.currentSheet);
+        requestAnimationFrame(this.renderCanvas.bind(this));
+    }
+
+    renderRhythmsTab() {
+        this.ctx.beginPath();
+        this.ctx.rect(0, 0, 150, this.sheetSize.height);
+        this.ctx.fillStyle = "#d4d4d3";
+        this.ctx.fill();
+    }
+
+    renderTracksTab() {
+        this.ctx.beginPath();
+        this.ctx.rect(150, 0, 100, this.sheetSize.height);
+        this.ctx.fillStyle = "#6d6d6c";
+        this.ctx.fill();
+
+    }
+
+    renderSheetTab(sheet) {
+        this.renderString();
+
         if (sheet === null)
             return;
+
         for (let i = 0; i < sheet.bars.length; i++) {
             this.renderBarFrame(i);
             let delta = (this.barWidth * i) + (this.barWidth / 16) + this.barBorder.left;
@@ -73,6 +99,8 @@ export default class TabPlayer extends React.Component {
                     delta += this.barWidth / 16;
             }
         }
+
+        this.renderProgressBar(this.progress);
     }
 
     renderBarFrame(idx) {
@@ -105,14 +133,6 @@ export default class TabPlayer extends React.Component {
         this.ctx.stroke();
     }
 
-    canvasRender() {
-        this.ctx.clearRect(0, 0, this.sheetSize.width, this.sheetSize.height);
-        this.renderString();
-        this.renderSheet(this.currentSheet);
-        this.renderProgressBar(this.progress);
-        requestAnimationFrame(this.canvasRender.bind(this));
-    }
-
     playProgress() {
         this.progress += (10 / ((60000 / this.currentSheet.bpm) * 4)) * this.barWidth;
         if (this.progress >= this.barWidth * this.currentSheet.bars.length) {
@@ -126,13 +146,12 @@ export default class TabPlayer extends React.Component {
         //if (this.state.isPluginLoaded)
         //    return;
         SheetPlayer.loadPlugin(plugin, chan).then((value) => {
-			this.currentChannel = chan;
+            this.currentChannel = chan;
             this.setState({ isPluginLoaded: value });
         });
     }
 
     loadSheet(url) {
-		console.log(url);
         ReadTabFile.read(url).then((sheet) => {
             this.currentSheet = sheet;
         });
@@ -168,8 +187,8 @@ export default class TabPlayer extends React.Component {
             <div>
                 <canvas width={this.sheetSize.width} height={this.sheetSize.height} ref={this.playerRef} />
                 <div style={{ display: "flex" }}>
-                    <button onClick={this.loadPlugin.bind(this,"distortion_guitar", 1)}>{this.state.isPluginLoaded ? "Plugin Loaded" : "Load Plugin"}</button>
-                    <button onClick={this.loadPlugin.bind(this,"acoustic_grand_piano", 2)}>{this.state.isPluginLoaded ? "Plugin Loaded" : "Load Plugin"}</button>
+                    <button onClick={this.loadPlugin.bind(this, "distortion_guitar", 1)}>{this.state.isPluginLoaded ? "Plugin Loaded" : "Load Plugin"}</button>
+                    <button onClick={this.loadPlugin.bind(this, "acoustic_grand_piano", 2)}>{this.state.isPluginLoaded ? "Plugin Loaded" : "Load Plugin"}</button>
                     <button onClick={this.loadSheet.bind(this, `${process.env.REACT_APP_BACKEND_HOST}/public/tab.tab`)}>Load Sheet1</button>
                     <button onClick={this.loadSheet.bind(this, `${process.env.REACT_APP_BACKEND_HOST}/public/stair.tab`)}>Load Sheet2</button>
                     <button onClick={this.play.bind(this)}>Play</button>
