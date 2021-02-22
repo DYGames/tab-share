@@ -31,6 +31,7 @@ export default class TabPlayer extends React.Component {
         this.currentSheet = null;
         this.progress = 0;
         this.progressInterval = null;
+		this.currentChannel = 0;
     }
 
     componentDidMount() {
@@ -121,15 +122,17 @@ export default class TabPlayer extends React.Component {
         }
     }
 
-    loadPlugin() {
-        if (this.state.isPluginLoaded)
-            return;
-        SheetPlayer.loadPlugin("distortion_guitar", 2).then((value) => {
+    loadPlugin(plugin, chan) {
+        //if (this.state.isPluginLoaded)
+        //    return;
+        SheetPlayer.loadPlugin(plugin, chan).then((value) => {
+			this.currentChannel = chan;
             this.setState({ isPluginLoaded: value });
         });
     }
 
     loadSheet(url) {
+		console.log(url);
         ReadTabFile.read(url).then((sheet) => {
             this.currentSheet = sheet;
         });
@@ -140,7 +143,7 @@ export default class TabPlayer extends React.Component {
             return;
 
         if (this.progress === 0)
-            SheetPlayer.playSheet(this.currentSheet, 2);
+            SheetPlayer.playSheet(this.currentSheet, this.currentChannel);
 
         if (this.progressInterval !== null)
             clearInterval(this.progressInterval);
@@ -165,9 +168,10 @@ export default class TabPlayer extends React.Component {
             <div>
                 <canvas width={this.sheetSize.width} height={this.sheetSize.height} ref={this.playerRef} />
                 <div style={{ display: "flex" }}>
-                    <button onClick={this.loadPlugin.bind(this)}>{this.state.isPluginLoaded ? "Plugin Loaded" : "Load Plugin"}</button>
-                    <button onClick={this.loadSheet.bind(this, "http://localhost:3001/public/tab.tab")}>Load Sheet1</button>
-                    <button onClick={this.loadSheet.bind(this, "http://localhost:3001/public/stair.tab")}>Load Sheet2</button>
+                    <button onClick={this.loadPlugin.bind(this,"distortion_guitar", 1)}>{this.state.isPluginLoaded ? "Plugin Loaded" : "Load Plugin"}</button>
+                    <button onClick={this.loadPlugin.bind(this,"acoustic_grand_piano", 2)}>{this.state.isPluginLoaded ? "Plugin Loaded" : "Load Plugin"}</button>
+                    <button onClick={this.loadSheet.bind(this, `${process.env.REACT_APP_BACKEND_HOST}/public/tab.tab`)}>Load Sheet1</button>
+                    <button onClick={this.loadSheet.bind(this, `${process.env.REACT_APP_BACKEND_HOST}/public/stair.tab`)}>Load Sheet2</button>
                     <button onClick={this.play.bind(this)}>Play</button>
                     <button onClick={this.pause.bind(this)}>Pause</button>
                     <button onClick={this.stop.bind(this)}>Stop</button>
