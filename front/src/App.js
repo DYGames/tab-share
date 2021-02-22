@@ -15,7 +15,7 @@ class App extends React.Component {
     }
 
     checkLogin() {
-        fetch("http://localhost:3001/UserInfo", {
+        fetch(`${process.env.REACT_APP_BACKEND_HOST}/UserInfo`, {
             method: "GET",
             credentials: "include",
         }).then((response) => {

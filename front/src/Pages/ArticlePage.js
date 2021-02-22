@@ -13,7 +13,7 @@ class ArticlePage extends React.Component {
     }
 
     componentDidMount() {
-        fetch("http://localhost:3001/Article/" + this.props.match.params.num).then((response) => {
+        fetch(`${process.env.REACT_APP_BACKEND_HOST}/Article/` + this.props.match.params.num).then((response) => {
             return response.json();
         }).then((json) => {
             this.setState({ article: json.data[0] })
@@ -38,7 +38,7 @@ class ArticlePage extends React.Component {
                     <Button linkTo="/" value="목록"></Button>
                     <Button linkTo={"/EditArticle/" + this.props.match.params.num} value="수정"></Button>
                     <Button onClick={() => {
-                        fetch("http://localhost:3001/Article/" + this.props.match.params.num, {
+                        fetch(`${process.env.REACT_APP_BACKEND_HOST}/Article/` + this.props.match.params.num, {
                             method: "DELETE"
                         }).then((response) => {
                             this.props.history.push("/");

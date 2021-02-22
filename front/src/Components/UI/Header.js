@@ -23,7 +23,7 @@ class Header extends React.Component {
             auth = (<div className="Auth">
                 <Link to="/UserInfo"><p>{this.props.user}</p></Link>
                 <a href="#!" onClick={() => {
-                    fetch("http://localhost:3001/Logout", {
+                    fetch(`${process.env.REACT_APP_BACKEND_HOST}/Logout`, {
                         method: "GET",
                         credentials: "include"
                     }).then((response) => {

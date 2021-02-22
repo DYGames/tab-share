@@ -95,7 +95,7 @@ class IndexPage extends React.Component {
     }
 
     componentDidMount() {
-        fetch("http://localhost:3001").then((response) => {
+        fetch(`${process.env.REACT_APP_BACKEND_HOST}`).then((response) => {
             return response.json()
         }).then((json) => {
             this.setState({ articles: json.data })

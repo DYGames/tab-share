@@ -16,7 +16,7 @@ class WriteArticlePage extends React.Component {
         if (!this.props.editMode)
             return;
 
-        fetch("http://localhost:3001/Article/" + this.props.match.params.num
+        fetch(`${process.env.REACT_APP_BACKEND_HOST}/Article/` + this.props.match.params.num
         ).then((response) => {
             return response.json();
         }).then((json) => {
@@ -36,11 +36,11 @@ class WriteArticlePage extends React.Component {
                 <Button className="SubmitArticle" value="등록" onClick={() => {
                     let url, method;
                     if (this.props.editMode) {
-                        url = "http://localhost:3001/Article/" + this.props.match.params.num;
+                        url = `${process.env.REACT_APP_BACKEND_HOST}/Article/` + this.props.match.params.num;
                         method = "PUT";
                     }
                     else {
-                        url = "http://localhost:3001/Article/";
+                        url = `${process.env.REACT_APP_BACKEND_HOST}/Article/`;
                         method = "POST";
                     }
 

@@ -12,7 +12,7 @@ class LoginPage extends React.Component {
                 </form>
 
                 <button onClick={() => {
-                    fetch("http://localhost:3001/Login", {
+                    fetch(`${process.env.REACT_APP_BACKEND_HOST}/Login`, {
                         method: "POST",
                         credentials: "include",
                         headers: {
