@@ -1,4 +1,5 @@
 import React from "react";
+import logo from "../../logo.svg"
 import SheetPlayer from "../../Logic/Tablature/SheetPlayer"
 import ReadTabFile from "../../Logic/Tablature/ReadTabFile"
 
@@ -42,25 +43,8 @@ export default class TabPlayer extends React.Component {
 
     renderCanvas() {
         this.ctx.clearRect(0, 0, this.sheetSize.width, this.sheetSize.height);
-        this.renderRhythmsTab();
-        this.renderTracksTab();
         this.renderSheetTab(this.currentSheet);
         requestAnimationFrame(this.renderCanvas.bind(this));
-    }
-
-    renderRhythmsTab() {
-        this.ctx.beginPath();
-        this.ctx.rect(0, 0, 150, this.sheetSize.height);
-        this.ctx.fillStyle = "#d4d4d3";
-        this.ctx.fill();
-    }
-
-    renderTracksTab() {
-        this.ctx.beginPath();
-        this.ctx.rect(150, 0, 100, this.sheetSize.height);
-        this.ctx.fillStyle = "#6d6d6c";
-        this.ctx.fill();
-
     }
 
     renderSheetTab(sheet) {
@@ -184,7 +168,163 @@ export default class TabPlayer extends React.Component {
 
     render() {
         return (
-            <div>
+            <div style={{display: "flex"}}>
+                <div style={{display: "inline-block"}}>
+                    <table>
+                        <tr>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>온음</span>
+                                    </div>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>온음</span>
+                                    </div>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>온음</span>
+                                    </div>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>온음</span>
+                                    </div>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>온음</span>
+                                    </div>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>온음</span>
+                                    </div>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>온음</span>
+                                    </div>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>온음</span>
+                                    </div>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>온음</span>
+                                    </div>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>온음</span>
+                                    </div>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>온음</span>
+                                    </div>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>온음</span>
+                                    </div>
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div style={{display: "inline-block"}}>
+                    <table>
+                        <tr>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>Guitar</span>
+                                    </div>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>Bass</span>
+                                    </div>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>Vocal</span>
+                                    </div>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="#!">
+                                    <div>
+                                        <img src={logo} alt=""></img>
+                                        <span>Drum</span>
+                                    </div>
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
                 <canvas width={this.sheetSize.width} height={this.sheetSize.height} ref={this.playerRef} />
                 <div style={{ display: "flex" }}>
                     <button onClick={this.loadPlugin.bind(this, "distortion_guitar", 1)}>{this.state.isPluginLoaded ? "Plugin Loaded" : "Load Plugin"}</button>
