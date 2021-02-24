@@ -1,5 +1,6 @@
 import React from "react";
 import logo from "../../logo.svg"
+import styled from "styled-components"
 import SheetPlayer from "../../Logic/Tablature/SheetPlayer"
 import ReadTabFile from "../../Logic/Tablature/ReadTabFile"
 
@@ -14,7 +15,7 @@ export default class TabPlayer extends React.Component {
         this.playerRef = React.createRef();
 
         this.sheetSize = {
-            width: 1300,
+            width: 1000,
             height: 800
         };
 
@@ -167,162 +168,175 @@ export default class TabPlayer extends React.Component {
     }
 
     render() {
+        const TabText = styled.a`    
+            text-decoration: none;
+            color: black;
+        `;
+        const Cell = styled.td`
+            border: 1px solid black;
+            padding: 0 0 0 0;
+        `;
+
         return (
-            <div style={{display: "flex"}}>
-                <div style={{display: "inline-block"}}>
-                    <table>
-                        <tr>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>온음</span>
-                                    </div>
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>온음</span>
-                                    </div>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>온음</span>
-                                    </div>
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>온음</span>
-                                    </div>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>온음</span>
-                                    </div>
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>온음</span>
-                                    </div>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>온음</span>
-                                    </div>
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>온음</span>
-                                    </div>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>온음</span>
-                                    </div>
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>온음</span>
-                                    </div>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>온음</span>
-                                    </div>
-                                </a>
-                            </td>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>온음</span>
-                                    </div>
-                                </a>
-                            </td>
-                        </tr>
+            <div style={{ display: "inline-block" }}>
+                <div style={{ float: "left" }}>
+                    <table style={{ borderSpacing: "0px" }}>
+                        <tbody>
+                            <tr>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>온음</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>온음</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                            </tr>
+                            <tr>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>온음</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>온음</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                            </tr>
+                            <tr>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>온음</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>온음</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                            </tr>
+                            <tr>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>온음</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>온음</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                            </tr>
+                            <tr>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>온음</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>온음</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                            </tr>
+                            <tr>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>온음</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>온음</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
-                <div style={{display: "inline-block"}}>
-                    <table>
-                        <tr>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>Guitar</span>
-                                    </div>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>Bass</span>
-                                    </div>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>Vocal</span>
-                                    </div>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a href="#!">
-                                    <div>
-                                        <img src={logo} alt=""></img>
-                                        <span>Drum</span>
-                                    </div>
-                                </a>
-                            </td>
-                        </tr>
+                <div style={{ float: "left" }}>
+                    <table style={{ borderSpacing: "0px" }}>
+                        <tbody>
+                            <tr>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>Guitar</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                            </tr>
+                            <tr>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>Bass</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                            </tr>
+                            <tr>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>Vocal</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                            </tr>
+                            <tr>
+                                <Cell>
+                                    <TabText href="#!">
+                                        <div>
+                                            <img src={logo} alt=""></img>
+                                            <span>Drum</span>
+                                        </div>
+                                    </TabText>
+                                </Cell>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
                 <canvas width={this.sheetSize.width} height={this.sheetSize.height} ref={this.playerRef} />
