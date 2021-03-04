@@ -44,80 +44,18 @@ export default class TabPlayer extends React.Component {
 
     renderCanvas() {
         this.ctx.clearRect(0, 0, this.sheetSize.width, this.sheetSize.height);
-        this.renderSheetTab(this.currentSheet);
+        if(this.currentSheet !== null)
+            this.currentSheet.render(this);
+        this.renderProgressBar(this.progress);
         requestAnimationFrame(this.renderCanvas.bind(this));
     }
 
-    renderSheetTab(sheet) {
-        if (sheet === null)
-            return;
-
-        for (let i = 0; i < sheet.bars.length; i++) {
-            this.renderString(i);
-            this.renderBarFrame(i);
-			this.renderBarNotes(sheet, i);
-        }
-
-        this.renderProgressBar(this.progress);
-    }
-
-	renderBarNotes(sheet, idx) {
-        let delta = (this.barWidth * (idx % 4)) + (this.barWidth / 16) + this.barBorder.left;
-        for (let j = 0; j < sheet.bars[idx].chords.length; j++) {
-        	for (let k = 0; k < sheet.bars[idx].chords[j].notes.length; k++) {
-                let fret = sheet.bars[idx].chords[j].notes[k].fret;
-                if (fret === 110) continue;
-                else if (fret === 120) fret = 'x';
-                let y = this.stringBorder * sheet.bars[idx].chords[j].notes[k].string;
-                this.ctx.fillStyle = '#FFFFFF';
-                this.ctx.fillRect(delta, (Math.floor(idx / 4) * (this.stringBorder * (this.stringCount + 1))) + y - 2, 8, 4);
-                this.ctx.fillStyle = '#000000';
-                this.ctx.fillText(`${fret}`, delta, (Math.floor(idx / 4) * (this.stringBorder * (this.stringCount + 1))) + y + (8 / 2));
-            }
-            this.ctx.fillStyle = '#000000';
-            this.ctx.fillText(`${["w", "h", "q", "e", "s", "wr", "hr", "qr", "er", "sr"][sheet.bars[idx].chords[j].notes[0].tempo]}`, delta, (Math.floor(idx / 4) * (this.stringBorder * (this.stringCount + 1))) + this.stringBorder * (this.stringCount + 1));
-
-            let tempo = sheet.bars[idx].chords[j].notes[0].tempo;
-            if (tempo === 0 || tempo === 5)
-                delta += this.barWidth / 1;
-            else if (tempo === 1 || tempo === 6)
-                delta += this.barWidth / 2;
-            else if (tempo === 2 || tempo === 7)
-                delta += this.barWidth / 4;
-            else if (tempo === 3 || tempo === 8)
-                delta += this.barWidth / 8;
-            else if (tempo === 4 || tempo === 9)
-                delta += this.barWidth / 16;
-        }
-	}
-	
-    renderBarFrame(idx) {
-        this.ctx.beginPath();
-        this.ctx.moveTo(this.barBorder.left + (this.barWidth * ((idx % 4))),  (Math.floor(idx / 4) * (this.stringBorder * (this.stringCount + 1))) + this.barBorder.top);
-        this.ctx.lineTo(this.barBorder.left + (this.barWidth * ((idx % 4))),  (Math.floor(idx / 4) * (this.stringBorder * (this.stringCount + 1))) + this.stringBorder * this.stringCount);
-        this.ctx.moveTo(this.barBorder.left + (this.barWidth * ((idx % 4) + 1)), (Math.floor(idx / 4) * (this.stringBorder * (this.stringCount + 1))) + this.barBorder.top);
-        this.ctx.lineTo(this.barBorder.left + (this.barWidth * ((idx % 4) + 1)), (Math.floor(idx / 4) * (this.stringBorder * (this.stringCount + 1))) + this.stringBorder * this.stringCount);
-        this.ctx.closePath();
-        this.ctx.stroke();
-    }
-
     renderProgressBar(x) {
-		let idx = Math.floor(x / this.barWidth);
+        let idx = Math.floor(x / this.barWidth);
         this.ctx.strokeStyle = '#FF00FF';
         this.ctx.beginPath();
-        this.ctx.moveTo(this.barBorder.left + (x -  (Math.floor(idx / 4)) * this.barWidth), (Math.floor(idx / 4) * (this.stringBorder * (this.stringCount + 1)) + this.barBorder.top));
-        this.ctx.lineTo(this.barBorder.left + (x -  (Math.floor(idx / 4)) * this.barWidth), (Math.floor(idx / 4) * (this.stringBorder * (this.stringCount + 1)) + this.stringBorder * this.stringCount));
-        this.ctx.closePath();
-        this.ctx.stroke();
-    }
-
-    renderString(idx) {
-        this.ctx.strokeStyle = '#000000';
-        this.ctx.beginPath();
-        for (let i = 0; i < this.stringCount; i++) {
-            this.ctx.moveTo(this.barBorder.left + (this.barWidth * ((idx % 4))), (Math.floor(idx / 4) * (this.stringBorder * (this.stringCount + 1))) + (this.stringBorder * (i + 1)));
-            this.ctx.lineTo(this.barBorder.left + (this.barWidth * ((idx % 4) + 1)), (Math.floor(idx / 4) * (this.stringBorder * (this.stringCount + 1))) + (this.stringBorder * (i + 1)));
-        }
+        this.ctx.moveTo(this.barBorder.left + (x - (Math.floor(idx / 4)) * (this.barWidth * 4)), (Math.floor(idx / 4) * (this.stringBorder * (this.stringCount + 1)) + this.barBorder.top));
+        this.ctx.lineTo(this.barBorder.left + (x - (Math.floor(idx / 4)) * (this.barWidth * 4)), (Math.floor(idx / 4) * (this.stringBorder * (this.stringCount + 1)) + this.stringBorder * this.stringCount));
         this.ctx.closePath();
         this.ctx.stroke();
     }
@@ -125,7 +63,7 @@ export default class TabPlayer extends React.Component {
     playProgress() {
         this.progress += (10 / ((60000 / this.currentSheet.bpm) * 4)) * this.barWidth;
         if (this.progress >= this.barWidth * this.currentSheet.bars.length) {
-            this.progress = this.barWidth * this.currentSheet.bars.length;
+            this.progress = this.barWidth * this.currentSheet.bars.length - 1;
             clearInterval(this.progressInterval);
             this.progressInterval = null;
         }
@@ -143,6 +81,7 @@ export default class TabPlayer extends React.Component {
     loadSheet(url) {
         ReadTabFile.read(url).then((sheet) => {
             this.currentSheet = sheet;
+            requestAnimationFrame(this.renderCanvas.bind(this));
         });
     }
 
