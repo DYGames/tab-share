@@ -8,7 +8,6 @@ import Track from "./Track";
 export default class ReadTabFile {
     static async read(path) {
         let sheet = new Sheet();
-        sheet.tracks.push(new Track());
         return await fetch(path, {
             method: "GET",
             credentials: "include",
@@ -16,31 +15,38 @@ export default class ReadTabFile {
             const array = Array.from(new Uint8Array(response));
             let mode = 0;
             let tempo = 0;
-            let index = -1;
+            let noteIndex = -1;
             let barIndex = 0;
+            let trackIndex = 0;
             let string = 1;
 
             for (let i = 0; i < array.length; i++) {
-                if(array[i] === 126) {
-                    sheet.tracks[0].bars.push(new Bar(barIndex));
+                if(array[i] === 125) {
+                    sheet.tracks.push(new Track(trackIndex));
+                    trackIndex++;
+                    barIndex = 0;
+                    noteIndex = 0;
+                }
+                else if(array[i] === 126) {
+                    sheet.tracks[trackIndex - 1].bars.push(new Bar(barIndex));
                     barIndex++;
                 }
                 else if (array[i] === 127) {
                     mode = 1;
                     string = 1;
-                    index++;
-                    sheet.tracks[0].bars[sheet.tracks[0].bars.length - 1].chords.push(new Chord());
+                    noteIndex++;
+                    sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords.push(new Chord());
                 }
                 else {
                     if (mode === 1) {
                         if (array[i] > 4) {
                             let note = new Note();
                             note.tempo = array[i];
-                            note.index = index;
+                            note.index = noteIndex;
                             note.string = 0;
                             note.fret = 0;
                             note.note = 0;
-                            sheet.tracks[0].bars[sheet.tracks[0].bars.length - 1].chords[sheet.tracks[0].bars[sheet.tracks[0].bars.length - 1].chords.length - 1].notes.push(note);
+                            sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords.length - 1].notes.push(note);
                         }
                         else {
                             tempo = array[i];
@@ -50,7 +56,7 @@ export default class ReadTabFile {
                     else if (mode === 2) {
                         let note = new Note();
                         note.tempo = tempo;
-                        note.index = index;
+                        note.index = noteIndex;
                         if ([69, 65, 68, 71, 66, 101].includes(array[i])) {
                             note.string = array[i];
                             i++;
@@ -90,7 +96,7 @@ export default class ReadTabFile {
                             ["D3", "Eb3", "E3", "F3", "Gb3", "G3", "Ab3", "A3", "Bb3", "B3"],
                             ["A2", "Bb2", "B2", "C3", "Db3", "D3", "Eb3", "E3", "F3", "Gb3"],
                             ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]][note.string][note.fret];
-                            sheet.tracks[0].bars[sheet.tracks[0].bars.length - 1].chords[sheet.tracks[0].bars[sheet.tracks[0].bars.length - 1].chords.length - 1].notes.push(note);
+                            sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords.length - 1].notes.push(note);
                     }
                 }
             }

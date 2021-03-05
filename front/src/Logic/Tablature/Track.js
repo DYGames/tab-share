@@ -1,7 +1,7 @@
 export default class Track {
-    constructor () {
+    constructor (index) {
         this.bars = [];
-        this.bpm = 82;
+        this.index = index;
     }
 
     render(sender) {

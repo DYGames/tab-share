@@ -22,10 +22,10 @@ export default class SheetPlayer {
     }
 
     static async playSheet(sheet, chan) {
-        for (let i = 0; i < sheet.bars.length; i++) {
+        for (let i = 0; i < sheet.tracks[0].bars.length; i++) {
             await new Promise((resolve) => {
                 (function chord(j) {
-                    if (j >= sheet.bars[i].chords.length) {
+                    if (j >= sheet.tracks[0].bars[i].chords.length) {
 						resolve(true);
 						return;
 					}
@@ -36,14 +36,14 @@ export default class SheetPlayer {
 
                     let tempo = 0;
                     let delay = 0;
-                    for (let k = 0; k < sheet.bars[i].chords[j].notes.length; k++) {
-                        tempo = sheet.bars[i].chords[j].notes[k].tempo;
+                    for (let k = 0; k < sheet.tracks[0].bars[i].chords[j].notes.length; k++) {
+                        tempo = sheet.tracks[0].bars[i].chords[j].notes[k].tempo;
                         if (tempo === 0 || tempo === 5) delay = (60000 / sheet.bpm) * 4;
                         else if (tempo === 1 || tempo === 6) delay = (60000 / sheet.bpm) * 2;
                         else if (tempo === 2 || tempo === 7) delay = 60000 / sheet.bpm;
                         else if (tempo === 3 || tempo === 8) delay = 60000 / sheet.bpm / 2;
                         else if (tempo === 4 || tempo === 9) delay = 60000 / sheet.bpm / 4;
-                        this.playNote(sheet.bars[i].chords[j].notes[k].note, chan, delay);
+                        this.playNote(sheet.tracks[0].bars[i].chords[j].notes[k].note, chan, delay);
                     }
                     setTimeout(chord.bind(this), delay, j + 1);
                 }.bind(this)(i === 0 ? -1 : 0));

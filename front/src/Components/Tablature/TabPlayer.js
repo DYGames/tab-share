@@ -62,8 +62,8 @@ export default class TabPlayer extends React.Component {
 
     playProgress() {
         this.progress += (10 / ((60000 / this.currentSheet.bpm) * 4)) * this.barWidth;
-        if (this.progress >= this.barWidth * this.currentSheet.bars.length) {
-            this.progress = this.barWidth * this.currentSheet.bars.length - 1;
+        if (this.progress >= this.barWidth * this.currentSheet.tracks[0].bars.length) {
+            this.progress = this.barWidth * this.currentSheet.tracks[0].bars.length - 1;
             clearInterval(this.progressInterval);
             this.progressInterval = null;
         }

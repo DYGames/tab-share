@@ -1,6 +1,7 @@
 export default class Sheet {
     constructor () {
         this.tracks = [];
+        this.bpm = 82;
     }
 
     render(sender) {
