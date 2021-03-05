@@ -3,10 +3,12 @@ import Bar from "./Bar"
 import Note from "./Note"
 import "whatwg-fetch"
 import Chord from "./Chord";
+import Track from "./Track";
 
 export default class ReadTabFile {
     static async read(path) {
         let sheet = new Sheet();
+        sheet.tracks.push(new Track());
         return await fetch(path, {
             method: "GET",
             credentials: "include",
@@ -20,14 +22,14 @@ export default class ReadTabFile {
 
             for (let i = 0; i < array.length; i++) {
                 if(array[i] === 126) {
-                    sheet.bars.push(new Bar(barIndex));
+                    sheet.tracks[0].bars.push(new Bar(barIndex));
                     barIndex++;
                 }
                 else if (array[i] === 127) {
                     mode = 1;
                     string = 1;
                     index++;
-                    sheet.bars[sheet.bars.length - 1].chords.push(new Chord());
+                    sheet.tracks[0].bars[sheet.tracks[0].bars.length - 1].chords.push(new Chord());
                 }
                 else {
                     if (mode === 1) {
@@ -38,7 +40,7 @@ export default class ReadTabFile {
                             note.string = 0;
                             note.fret = 0;
                             note.note = 0;
-                            sheet.bars[sheet.bars.length - 1].chords[sheet.bars[sheet.bars.length - 1].chords.length - 1].notes.push(note);
+                            sheet.tracks[0].bars[sheet.tracks[0].bars.length - 1].chords[sheet.tracks[0].bars[sheet.tracks[0].bars.length - 1].chords.length - 1].notes.push(note);
                         }
                         else {
                             tempo = array[i];
@@ -88,7 +90,7 @@ export default class ReadTabFile {
                             ["D3", "Eb3", "E3", "F3", "Gb3", "G3", "Ab3", "A3", "Bb3", "B3"],
                             ["A2", "Bb2", "B2", "C3", "Db3", "D3", "Eb3", "E3", "F3", "Gb3"],
                             ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]][note.string][note.fret];
-                            sheet.bars[sheet.bars.length - 1].chords[sheet.bars[sheet.bars.length - 1].chords.length - 1].notes.push(note);
+                            sheet.tracks[0].bars[sheet.tracks[0].bars.length - 1].chords[sheet.tracks[0].bars[sheet.tracks[0].bars.length - 1].chords.length - 1].notes.push(note);
                     }
                 }
             }
