@@ -1,12 +1,11 @@
 export default class Sheet {
-    constructor () {
+    constructor() {
         this.tracks = [];
+        this.currentTrack = 0;
         this.bpm = 82;
     }
 
     render(sender) {
-        for (let i = 0; i < this.tracks.length; i++) {
-            this.tracks[i].render(sender);
-        }
+        this.tracks[this.currentTrack].render(sender);
     }
 }

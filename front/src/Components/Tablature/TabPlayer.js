@@ -9,7 +9,8 @@ export default class TabPlayer extends React.Component {
         super(props);
 
         this.state = {
-            isPluginLoaded: false,
+            currentSheet: null,
+            loadedPluginIndex: -1,
         }
 
         this.playerRef = React.createRef();
@@ -30,7 +31,6 @@ export default class TabPlayer extends React.Component {
 
         this.stringBorder = 15;
         this.stringCount = 6;
-        this.currentSheet = null;
         this.progress = 0;
         this.progressInterval = null;
         this.currentChannel = 0;
@@ -44,8 +44,8 @@ export default class TabPlayer extends React.Component {
 
     renderCanvas() {
         this.ctx.clearRect(0, 0, this.sheetSize.width, this.sheetSize.height);
-        if(this.currentSheet !== null)
-            this.currentSheet.render(this);
+        if (this.state.currentSheet !== null)
+            this.state.currentSheet.render(this);
         this.renderProgressBar(this.progress);
         requestAnimationFrame(this.renderCanvas.bind(this));
     }
@@ -61,36 +61,34 @@ export default class TabPlayer extends React.Component {
     }
 
     playProgress() {
-        this.progress += (10 / ((60000 / this.currentSheet.bpm) * 4)) * this.barWidth;
-        if (this.progress >= this.barWidth * this.currentSheet.tracks[0].bars.length) {
-            this.progress = this.barWidth * this.currentSheet.tracks[0].bars.length - 1;
+        this.progress += (10 / ((60000 / this.state.currentSheet.bpm) * 4)) * this.barWidth;
+        if (this.progress >= this.barWidth * this.state.currentSheet.tracks[0].bars.length) {
+            this.progress = this.barWidth * this.state.currentSheet.tracks[0].bars.length - 1;
             clearInterval(this.progressInterval);
             this.progressInterval = null;
         }
     }
 
     loadPlugin(plugin, chan) {
-        //if (this.state.isPluginLoaded)
-        //    return;
         SheetPlayer.loadPlugin(plugin, chan).then((value) => {
             this.currentChannel = chan;
-            this.setState({ isPluginLoaded: value });
+            this.setState({ loadedPluginIndex: chan });
         });
     }
 
     loadSheet(url) {
         ReadTabFile.read(url).then((sheet) => {
-            this.currentSheet = sheet;
+            this.setState({ currentSheet: sheet });
             requestAnimationFrame(this.renderCanvas.bind(this));
         });
     }
 
     play() {
-        if (this.currentSheet === null || !this.state.isPluginLoaded)
+        if (this.state.currentSheet === null)
             return;
 
         if (this.progress === 0)
-            SheetPlayer.playSheet(this.currentSheet, this.currentChannel);
+            SheetPlayer.playSheet(this.state.currentSheet, this.currentChannel);
 
         if (this.progressInterval !== null)
             clearInterval(this.progressInterval);
@@ -110,6 +108,14 @@ export default class TabPlayer extends React.Component {
             clearInterval(this.progressInterval);
     }
 
+    changeTrack(index) {
+        if (this.state.currentSheet !== null) {
+            const tmp = { ...this.state };
+            tmp.currentSheet.currentTrack = index;
+            this.setState(tmp);
+        }
+    }
+
     render() {
         const TabText = styled.a`    
             text-decoration: none;
@@ -119,14 +125,29 @@ export default class TabPlayer extends React.Component {
             border: 1px solid black;
             padding: 0 0 0 0;
         `;
-
+        let TrackButtons = [];
+        if (this.state.currentSheet !== null) {
+            for (let i = 0; i < this.state.currentSheet.tracks.length; i++) {
+                TrackButtons.push(
+                    <tr key={i}>
+                        <Cell>
+                            <button onClick={this.changeTrack.bind(this, i)}>
+                                <div>
+                                    <img src={logo} alt=""></img>
+                                    <span>Guitar {i + 1}</span>
+                                </div>
+                            </button>
+                        </Cell>
+                    </tr>);
+            }
+        }
         return (
             <table style={{ height: "1px" }}>
                 <tbody>
                     <tr>
                         <td>
                             <div style={{ float: "left", height: "100%" }}>
-                                <table style={{ borderSpacing: "0px"/*, height: "100%" */}}>
+                                <table style={{ borderSpacing: "0px"/*, height: "100%" */ }}>
                                     <tbody>
                                         <tr>
                                             <Cell>
@@ -240,48 +261,9 @@ export default class TabPlayer extends React.Component {
                                 </table>
                             </div>
                             <div style={{ float: "left", height: "100%" }}>
-                                <table style={{ borderSpacing: "0px"/*, height: "100%" */}}>
+                                <table style={{ borderSpacing: "0px" }}>
                                     <tbody>
-                                        <tr>
-                                            <Cell>
-                                                <TabText href="#!">
-                                                    <div>
-                                                        <img src={logo} alt=""></img>
-                                                        <span>Guitar</span>
-                                                    </div>
-                                                </TabText>
-                                            </Cell>
-                                        </tr>
-                                        <tr>
-                                            <Cell>
-                                                <TabText href="#!">
-                                                    <div>
-                                                        <img src={logo} alt=""></img>
-                                                        <span>Bass</span>
-                                                    </div>
-                                                </TabText>
-                                            </Cell>
-                                        </tr>
-                                        <tr>
-                                            <Cell>
-                                                <TabText href="#!">
-                                                    <div>
-                                                        <img src={logo} alt=""></img>
-                                                        <span>Vocal</span>
-                                                    </div>
-                                                </TabText>
-                                            </Cell>
-                                        </tr>
-                                        <tr>
-                                            <Cell>
-                                                <TabText href="#!">
-                                                    <div>
-                                                        <img src={logo} alt=""></img>
-                                                        <span>Drum</span>
-                                                    </div>
-                                                </TabText>
-                                            </Cell>
-                                        </tr>
+                                        {TrackButtons}
                                     </tbody>
                                 </table>
                             </div>
@@ -296,8 +278,8 @@ export default class TabPlayer extends React.Component {
                         <td>
 
                             <div style={{ display: "flex" }}>
-                                <button onClick={this.loadPlugin.bind(this, "distortion_guitar", 1)}>{this.state.isPluginLoaded ? "Plugin Loaded" : "Load Plugin"}</button>
-                                <button onClick={this.loadPlugin.bind(this, "acoustic_grand_piano", 2)}>{this.state.isPluginLoaded ? "Plugin Loaded" : "Load Plugin"}</button>
+                                <button onClick={this.loadPlugin.bind(this, "distortion_guitar", 1)}>{this.state.loadedPluginIndex === 1 ? "Plugin Loaded" : "Load Plugin"}</button>
+                                <button onClick={this.loadPlugin.bind(this, "acoustic_grand_piano", 2)}>{this.state.loadedPluginIndex === 2 ? "Plugin Loaded" : "Load Plugin"}</button>
                                 <button onClick={this.loadSheet.bind(this, `${process.env.REACT_APP_BACKEND_HOST}/public/tab.tab`)}>Load Sheet1</button>
                                 <button onClick={this.loadSheet.bind(this, `${process.env.REACT_APP_BACKEND_HOST}/public/stair.tab`)}>Load Sheet2</button>
                                 <button onClick={this.play.bind(this)}>Play</button>
