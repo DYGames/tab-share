@@ -6,7 +6,7 @@ export default class SheetPlayer {
             MIDI.loadPlugin({
                 soundfontUrl: './soundfont/',
                 instrument: inst,
-                onprogress: function (state, progress) {},
+                onprogress: function (state, progress) { },
                 onsuccess: function () {
                     MIDI.programChange(chan, MIDI.GM.byName[inst].number);
                     resolve(true);
@@ -26,9 +26,9 @@ export default class SheetPlayer {
             await new Promise((resolve) => {
                 (function chord(j) {
                     if (j >= sheet.tracks[0].bars[i].chords.length) {
-						resolve(true);
-						return;
-					}
+                        resolve(true);
+                        return;
+                    }
                     if (j === -1) {
                         setTimeout(chord.bind(this), 60000 / sheet.bpm / 4, j + 1);
                         return;
@@ -36,14 +36,18 @@ export default class SheetPlayer {
 
                     let tempo = 0;
                     let delay = 0;
-                    for (let k = 0; k < sheet.tracks[0].bars[i].chords[j].notes.length; k++) {
-                        tempo = sheet.tracks[0].bars[i].chords[j].notes[k].tempo;
-                        if (tempo === 0 || tempo === 5) delay = (60000 / sheet.bpm) * 4;
-                        else if (tempo === 1 || tempo === 6) delay = (60000 / sheet.bpm) * 2;
-                        else if (tempo === 2 || tempo === 7) delay = 60000 / sheet.bpm;
-                        else if (tempo === 3 || tempo === 8) delay = 60000 / sheet.bpm / 2;
-                        else if (tempo === 4 || tempo === 9) delay = 60000 / sheet.bpm / 4;
-                        this.playNote(sheet.tracks[0].bars[i].chords[j].notes[k].note, chan, delay);
+                    for (let l = 0; l < sheet.tracks.length; l++) {
+                        if (sheet.tracks[l].bars[i] === undefined || sheet.tracks[l].bars[i].chords[j] === undefined)
+                            continue;
+                        for (let k = 0; k < sheet.tracks[l].bars[i].chords[j].notes.length; k++) {
+                            tempo = sheet.tracks[l].bars[i].chords[j].notes[k].tempo;
+                            if (tempo === 0 || tempo === 5) delay = (60000 / sheet.bpm) * 4;
+                            else if (tempo === 1 || tempo === 6) delay = (60000 / sheet.bpm) * 2;
+                            else if (tempo === 2 || tempo === 7) delay = 60000 / sheet.bpm;
+                            else if (tempo === 3 || tempo === 8) delay = 60000 / sheet.bpm / 2;
+                            else if (tempo === 4 || tempo === 9) delay = 60000 / sheet.bpm / 4;
+                            this.playNote(sheet.tracks[l].bars[i].chords[j].notes[k].note, chan, delay);
+                        }
                     }
                     setTimeout(chord.bind(this), delay, j + 1);
                 }.bind(this)(i === 0 ? -1 : 0));
