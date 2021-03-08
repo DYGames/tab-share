@@ -36,26 +36,45 @@ export default class TabPlayer extends React.Component {
         this.progressInterval = null;
         this.currentChannel = 0;
         this.currentNote = 0;
+        this.isEdit = false;
+        this.inputNote = 0;
     }
 
     componentDidMount() {
         this.ctx = this.playerRef.current.getContext('2d');
         this.ctx.font = '10pt Consolas';
-        this.playerRef.current.addEventListener("mouseclick", (e) => {
-
-        });
+        this.playerRef.current.addEventListener("click", ((e) => {
+            this.isEdit = !this.isEdit;
+            // 몇 번째 마디의 몇 번째 index 에 몇 번째 string인지, 그곳에 input field render.
+            requestAnimationFrame(this.renderCanvas.bind(this));
+        }).bind(this));
+        this.playerRef.current.addEventListener("keypress", ((e) => {
+            if (!this.isEdit) return;
+            this.inputNote = e.keyCode;
+            requestAnimationFrame(this.renderCanvas.bind(this));
+        }).bind(this));
         this.renderCanvas();
     }
 
     renderCanvas() {
         this.ctx.clearRect(0, 0, this.sheetSize.width, this.sheetSize.height);
+
         if (this.state.currentSheet !== null)
             this.state.currentSheet.render(this);
+
         this.renderProgressBar(this.progress);
+
+        if (this.isEdit)
+            this.renderEditor();
+
         if (this.progress !== this.prevProgress) {
             requestAnimationFrame(this.renderCanvas.bind(this));
             this.prevProgress = this.progress;
         }
+    }
+
+    renderEditor() {
+
     }
 
     renderProgressBar(x) {
