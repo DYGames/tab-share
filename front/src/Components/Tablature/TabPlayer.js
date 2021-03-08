@@ -35,11 +35,15 @@ export default class TabPlayer extends React.Component {
         this.prevProgress = 0;
         this.progressInterval = null;
         this.currentChannel = 0;
+        this.currentNote = 0;
     }
 
     componentDidMount() {
         this.ctx = this.playerRef.current.getContext('2d');
         this.ctx.font = '10pt Consolas';
+        this.playerRef.current.addEventListener("mouseclick", (e) => {
+
+        });
         this.renderCanvas();
     }
 
@@ -122,7 +126,7 @@ export default class TabPlayer extends React.Component {
     }
 
     changeNote(index) {
-
+        this.currentNote = index;
     }
 
     render() {
