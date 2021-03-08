@@ -43,7 +43,7 @@ export default class SheetPlayer {
                                 k < sheet.tracks[l].bars[i].chords[j].notes.length;
                                 k++
                             ) {
-                                tempo = sheet.tracks[l].bars[i].chords[j].notes[k].tempo;
+                                tempo = sheet.tracks[l].bars[i].chords[j].tempo;
                                 if (tempo === 0 || tempo === 5) delay = (60000 / sheet.bpm) * 4;
                                 else if (tempo === 1 || tempo === 6)
                                     delay = (60000 / sheet.bpm) * 2;

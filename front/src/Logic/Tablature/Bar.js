@@ -10,7 +10,7 @@ export default class Bar {
         let delta = (sender.barWidth * (this.index % 4)) + (sender.barWidth / 16) + sender.barBorder.left;
         for (let i = 0; i < this.chords.length; i++) {
             this.chords[i].render(sender, this.index, delta);
-            let tempo = this.chords[i].notes[0].tempo;
+            let tempo = this.chords[i].tempo;
             if (tempo === 0 || tempo === 5)
                 delta += sender.barWidth / 1;
             else if (tempo === 1 || tempo === 6)

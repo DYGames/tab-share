@@ -1,6 +1,8 @@
 export default class Chord {
-    constructor() {
+    constructor(index, tempo) {
         this.notes = [];
+        this.index = index;
+        this.tempo = tempo;
     }
 
     render(sender, index, delta) {
@@ -15,7 +17,7 @@ export default class Chord {
             sender.ctx.fillText(`${fret}`, delta, (Math.floor(index / 4) * (sender.stringBorder * (sender.stringCount + 1))) + y + (8 / 2));
         }
         sender.ctx.fillStyle = '#000000';
-        sender.ctx.fillText(`${["w", "h", "q", "e", "s", "wr", "hr", "qr", "er", "sr"][this.notes[0].tempo]}`, delta, (Math.floor(index / 4) * (sender.stringBorder * (sender.stringCount + 1))) + sender.stringBorder * (sender.stringCount + 1));
+        sender.ctx.fillText(`${["w", "h", "q", "e", "s", "wr", "hr", "qr", "er", "sr"][this.tempo]}`, delta, (Math.floor(index / 4) * (sender.stringBorder * (sender.stringCount + 1))) + sender.stringBorder * (sender.stringCount + 1));
 
     }
 }

@@ -4,13 +4,15 @@ import styled from "styled-components"
 import SheetPlayer from "../../Logic/Tablature/SheetPlayer"
 import ReadTabFile from "../../Logic/Tablature/ReadTabFile"
 import Note from "../../Logic/Tablature/Note";
+import Bar from "../../Logic/Tablature/Bar";
+import Chord from "../../Logic/Tablature/Chord";
 
 export default class TabPlayer extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            currentSheet: null,
+            sheetChanged: false,
             loadedPluginIndex: -1,
         }
 
@@ -30,6 +32,7 @@ export default class TabPlayer extends React.Component {
 
         this.barWidth = (this.sheetSize.width - (this.barBorder.left + this.barBorder.right)) / 4;
 
+        this.currentSheet = null;
         this.stringBorder = 15;
         this.stringCount = 6;
         this.progress = 0;
@@ -46,14 +49,21 @@ export default class TabPlayer extends React.Component {
         this.playerRef.current.addEventListener("click", (e) => {
             this.isEdit = !this.isEdit;
             if (!this.isEdit) {
-                this.state.currentSheet.tracks[this.state.currentSheet.currentTrack].bars[this.editBar].chords[this.editIndex].notes.push(new Note(this.editIndex + 1, this.currentTempo, this.editString + 1, Number(this.inputNote), [[],
+                let bar = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar];
+                if (bar.chords.length === 0) {
+                    for (let i = 0; i < 8; i++) {
+                        bar.chords.push(new Chord(i, 3));
+                    }
+                }
+                //this.editIndex + 1, this.currentTempo, 
+                bar.chords[this.editIndex].notes.push(new Note(this.editString + 1, Number(this.inputNote), [[],
                 ["E4", "F4", "Gb4", "G4", "Ab4", "A4", "Bb4", "B4", "C5", "Cb5"],
                 ["B3", "C4", "Db4", "D4", "Eb4", "E4", "F4", "Gb4", "G4", "Ab5"],
                 ["G3", "Ab3", "A3", "Bb3", "B3", "C4", "Db4", "D4", "Eb4", "E4"],
                 ["D3", "Eb3", "E3", "F3", "Gb3", "G3", "Ab3", "A3", "Bb3", "B3"],
                 ["A2", "Bb2", "B2", "C3", "Db3", "D3", "Eb3", "E3", "F3", "Gb3"],
                 ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]][this.editString + 1][Number(this.inputNote)]));
-                console.log(this.state.currentSheet);
+                console.log(this.currentSheet);
                 requestAnimationFrame(this.renderCanvas.bind(this));
                 return;
             }
@@ -77,8 +87,8 @@ export default class TabPlayer extends React.Component {
     renderCanvas() {
         this.ctx.clearRect(0, 0, this.sheetSize.width, this.sheetSize.height);
 
-        if (this.state.currentSheet !== null)
-            this.state.currentSheet.render(this);
+        if (this.currentSheet !== null)
+            this.currentSheet.render(this);
 
         this.renderProgressBar(this.progress);
 
@@ -107,10 +117,10 @@ export default class TabPlayer extends React.Component {
     }
 
     playProgress() {
-        this.progress += (10 / ((60000 / this.state.currentSheet.bpm) * 4)) * this.barWidth;
+        this.progress += (10 / ((60000 / this.currentSheet.bpm) * 4)) * this.barWidth;
         requestAnimationFrame(this.renderCanvas.bind(this));
-        if (this.progress >= this.barWidth * this.state.currentSheet.tracks[0].bars.length) {
-            this.progress = this.barWidth * this.state.currentSheet.tracks[0].bars.length - 1;
+        if (this.progress >= this.barWidth * this.currentSheet.tracks[0].bars.length) {
+            this.progress = this.barWidth * this.currentSheet.tracks[0].bars.length - 1;
             clearInterval(this.progressInterval);
             this.progressInterval = null;
         }
@@ -125,17 +135,18 @@ export default class TabPlayer extends React.Component {
 
     loadSheet(url) {
         ReadTabFile.read(url).then((sheet) => {
-            this.setState({ currentSheet: sheet });
+            this.currentSheet = sheet;
+            this.setState({ sheetChanged: !this.state.sheetChanged });
             requestAnimationFrame(this.renderCanvas.bind(this));
         });
     }
 
     play() {
-        if (this.state.currentSheet === null)
+        if (this.currentSheet === null)
             return;
 
         if (this.progress === 0)
-            SheetPlayer.playSheet(this.state.currentSheet, this.currentChannel);
+            SheetPlayer.playSheet(this.currentSheet, this.currentChannel);
 
         if (this.progressInterval !== null)
             clearInterval(this.progressInterval);
@@ -156,16 +167,19 @@ export default class TabPlayer extends React.Component {
     }
 
     changeTrack(index) {
-        if (this.state.currentSheet !== null) {
-            const tmp = { ...this.state };
-            tmp.currentSheet.currentTrack = index;
-            this.setState(tmp);
+        if (this.currentSheet !== null) {
+            this.currentSheet.currentTrack = index;
             requestAnimationFrame(this.renderCanvas.bind(this));
         }
     }
 
     changeNote(index) {
         this.currentTempo = index;
+    }
+
+    addBar() {
+        this.currentSheet.tracks[this.currentSheet.currentTrack].bars.push(new Bar(this.currentSheet.tracks[this.currentSheet.currentTrack].bars.length));
+        requestAnimationFrame(this.renderCanvas.bind(this));
     }
 
     render() {
@@ -198,8 +212,8 @@ export default class TabPlayer extends React.Component {
                 </tr>);
         }
         let trackButtons = [];
-        if (this.state.currentSheet !== null) {
-            for (let i = 0; i < this.state.currentSheet.tracks.length; i++) {
+        if (this.currentSheet !== null) {
+            for (let i = 0; i < this.currentSheet.tracks.length; i++) {
                 trackButtons.push(
                     <tr key={i}>
                         <Cell>
@@ -222,6 +236,16 @@ export default class TabPlayer extends React.Component {
                                 <table style={{ borderColor: "transparent" }}>
                                     <tbody>
                                         {noteButtons}
+                                        <tr>
+                                            <Cell>
+                                                <button onClick={this.addBar.bind(this)}>
+                                                    <div>
+                                                        <img src={logo} alt=""></img>
+                                                        <span>Add Bar</span>
+                                                    </div>
+                                                </button>
+                                            </Cell>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
