@@ -3,6 +3,7 @@ import logo from "../../logo.svg"
 import styled from "styled-components"
 import SheetPlayer from "../../Logic/Tablature/SheetPlayer"
 import ReadTabFile from "../../Logic/Tablature/ReadTabFile"
+import Note from "../../Logic/Tablature/Note";
 
 export default class TabPlayer extends React.Component {
     constructor(props) {
@@ -32,27 +33,44 @@ export default class TabPlayer extends React.Component {
         this.stringBorder = 15;
         this.stringCount = 6;
         this.progress = 0;
-        this.prevProgress = 0;
         this.progressInterval = null;
         this.currentChannel = 0;
-        this.currentNote = 0;
+        this.currentTempo = 0;
         this.isEdit = false;
-        this.inputNote = 0;
+        this.inputNote = "";
     }
 
     componentDidMount() {
         this.ctx = this.playerRef.current.getContext('2d');
         this.ctx.font = '10pt Consolas';
-        this.playerRef.current.addEventListener("click", ((e) => {
+        this.playerRef.current.addEventListener("click", (e) => {
             this.isEdit = !this.isEdit;
-            // 몇 번째 마디의 몇 번째 index 에 몇 번째 string인지, 그곳에 input field render.
+            if (!this.isEdit) {
+                this.state.currentSheet.tracks[this.state.currentSheet.currentTrack].bars[this.editBar].chords[this.editIndex].notes.push(new Note(this.editIndex + 1, this.currentTempo, this.editString + 1, Number(this.inputNote), [[],
+                ["E4", "F4", "Gb4", "G4", "Ab4", "A4", "Bb4", "B4", "C5", "Cb5"],
+                ["B3", "C4", "Db4", "D4", "Eb4", "E4", "F4", "Gb4", "G4", "Ab5"],
+                ["G3", "Ab3", "A3", "Bb3", "B3", "C4", "Db4", "D4", "Eb4", "E4"],
+                ["D3", "Eb3", "E3", "F3", "Gb3", "G3", "Ab3", "A3", "Bb3", "B3"],
+                ["A2", "Bb2", "B2", "C3", "Db3", "D3", "Eb3", "E3", "F3", "Gb3"],
+                ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]][this.editString + 1][Number(this.inputNote)]));
+                console.log(this.state.currentSheet);
+                requestAnimationFrame(this.renderCanvas.bind(this));
+                return;
+            }
+            this.inputNote = "";
+            var rect = e.target.getBoundingClientRect();
+            var x = e.clientX - rect.left;
+            var y = e.clientY - rect.top;
+            this.editString = (Math.round(y / this.stringBorder) - 1) % 7;
+            this.editBar = Math.floor((x - this.barBorder.left) / this.barWidth) + (Math.floor((Math.round(y / this.stringBorder) - 1) / (this.stringCount + 1)) * 4);
+            this.editIndex = Math.floor(((x - this.barBorder.left) - (Math.floor((x - this.barBorder.left) / this.barWidth) * this.barWidth)) / (this.barWidth / 8));
             requestAnimationFrame(this.renderCanvas.bind(this));
-        }).bind(this));
-        this.playerRef.current.addEventListener("keypress", ((e) => {
+        });
+        window.onkeypress = (e) => {
             if (!this.isEdit) return;
-            this.inputNote = e.keyCode;
+            this.inputNote += String.fromCharCode(e.keyCode);
             requestAnimationFrame(this.renderCanvas.bind(this));
-        }).bind(this));
+        };
         this.renderCanvas();
     }
 
@@ -66,15 +84,16 @@ export default class TabPlayer extends React.Component {
 
         if (this.isEdit)
             this.renderEditor();
-
-        if (this.progress !== this.prevProgress) {
-            requestAnimationFrame(this.renderCanvas.bind(this));
-            this.prevProgress = this.progress;
-        }
     }
 
     renderEditor() {
-
+        let delta = (this.barWidth * (this.editBar % 4)) + (this.barWidth / 16) + this.barBorder.left + (this.editIndex * (this.barWidth / 8));
+        this.ctx.fillStyle = '#000000';
+        this.ctx.fillRect(delta - 1, (Math.floor(this.editBar / 4) * (this.stringBorder * (this.stringCount + 1))) + (this.stringBorder * (this.editString + 1)) - 9, 18, 18);
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillRect(delta, (Math.floor(this.editBar / 4) * (this.stringBorder * (this.stringCount + 1))) + (this.stringBorder * (this.editString + 1)) - 8, 16, 16);
+        this.ctx.fillStyle = '#000000';
+        this.ctx.fillText(`${this.inputNote}`, delta, (Math.floor(this.editBar / 4) * (this.stringBorder * (this.stringCount + 1))) + (this.stringBorder * (this.editString + 1)) + 4);
     }
 
     renderProgressBar(x) {
@@ -89,6 +108,7 @@ export default class TabPlayer extends React.Component {
 
     playProgress() {
         this.progress += (10 / ((60000 / this.state.currentSheet.bpm) * 4)) * this.barWidth;
+        requestAnimationFrame(this.renderCanvas.bind(this));
         if (this.progress >= this.barWidth * this.state.currentSheet.tracks[0].bars.length) {
             this.progress = this.barWidth * this.state.currentSheet.tracks[0].bars.length - 1;
             clearInterval(this.progressInterval);
@@ -145,16 +165,17 @@ export default class TabPlayer extends React.Component {
     }
 
     changeNote(index) {
-        this.currentNote = index;
+        this.currentTempo = index;
     }
 
     render() {
         const Cell = styled.td`
-            border: 1px solid black;
+            border: 1px solid #f6f8fa;
+            border-radius: 6px;
             padding: 0 0 0 0;
         `;
         let noteButtons = [];
-        let noteIds = ["온음표", "2분음표", "4분음표", "8분음표", "16분음표", "32분음표", "온쉼표", "2분쉼표", "4분쉼표", "8분쉼표", "16분쉼표", "32분쉼표"];
+        let noteIds = ["온음표", "2분음표", "4분음표", "8분음표", "16분음표", "온쉼표", "2분쉼표", "4분쉼표", "8분쉼표", "16분쉼표"];
         for (let i = 0; i < noteIds.length; i += 2) {
             noteButtons.push(
                 <tr key={i}>
