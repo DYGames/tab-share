@@ -1,8 +1,9 @@
 export default class Chord {
-    constructor(index, tempo) {
+    constructor(index, tempo, active) {
         this.notes = [];
         this.index = index;
         this.tempo = tempo;
+        this.active = active;
     }
 
     render(sender, index, delta) {

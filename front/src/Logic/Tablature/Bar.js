@@ -1,7 +1,12 @@
+import Chord from "./Chord";
+
 export default class Bar {
     constructor(index) {
         this.index = index;
         this.chords = [];
+        for (let j = 0; j < 8; j++) {
+            this.chords.push(new Chord(j, 3, true));
+        }
     }
 
     render(sender) {
@@ -9,6 +14,7 @@ export default class Bar {
         this.renderBarFrame(sender, this.index);
         let delta = (sender.barWidth * (this.index % 4)) + (sender.barWidth / 16) + sender.barBorder.left;
         for (let i = 0; i < this.chords.length; i++) {
+            if (!this.chords[i].active) continue;
             this.chords[i].render(sender, this.index, delta);
             let tempo = this.chords[i].tempo;
             if (tempo === 0 || tempo === 5)

@@ -48,7 +48,7 @@ export default class TabPlayer extends React.Component {
         this.ctx.font = '10pt Consolas';
         this.playerRef.current.addEventListener("click", (e) => {
             this.isEdit = !this.isEdit;
-            if (!this.isEdit) {
+            if (!this.isEdit && this.inputNote !== "") {
                 let bar = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar];
                 if (bar.chords.length === 0) {
                     for (let i = 0; i < 8; i++) {
@@ -62,7 +62,7 @@ export default class TabPlayer extends React.Component {
                 ["G3", "Ab3", "A3", "Bb3", "B3", "C4", "Db4", "D4", "Eb4", "E4"],
                 ["D3", "Eb3", "E3", "F3", "Gb3", "G3", "Ab3", "A3", "Bb3", "B3"],
                 ["A2", "Bb2", "B2", "C3", "Db3", "D3", "Eb3", "E3", "F3", "Gb3"],
-                ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]][this.editString + 1][Number(this.inputNote)]));
+                ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]][this.editString + 1][Number(this.inputNote)], true));
                 console.log(this.currentSheet);
                 requestAnimationFrame(this.renderCanvas.bind(this));
                 return;
@@ -78,6 +78,12 @@ export default class TabPlayer extends React.Component {
         });
         window.onkeypress = (e) => {
             if (!this.isEdit) return;
+            if (e.keyCode === 127) {
+                this.isEdit = false;
+                this.inputNote = "";
+                this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords[this.editIndex].notes[this.editString].active = false;
+            }
+
             this.inputNote += String.fromCharCode(e.keyCode);
             requestAnimationFrame(this.renderCanvas.bind(this));
         };

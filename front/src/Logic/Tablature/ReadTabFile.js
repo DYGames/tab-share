@@ -2,7 +2,6 @@ import Sheet from "./Sheet"
 import Bar from "./Bar"
 import Note from "./Note"
 import "whatwg-fetch"
-import Chord from "./Chord";
 import Track from "./Track";
 
 export default class ReadTabFile {
@@ -21,32 +20,34 @@ export default class ReadTabFile {
             let string = 1;
 
             for (let i = 0; i < array.length; i++) {
-                if(array[i] === 125) {
+                if (array[i] === 125) {
                     sheet.tracks.push(new Track(trackIndex));
                     trackIndex++;
                     barIndex = 0;
                     noteIndex = 0;
                 }
-                else if(array[i] === 126) {
+                else if (array[i] === 126) {
                     sheet.tracks[trackIndex - 1].bars.push(new Bar(barIndex));
+                    noteIndex = 0;
                     barIndex++;
                 }
                 else if (array[i] === 127) {
                     mode = 1;
                     string = 1;
                     noteIndex++;
-                    sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords.push(new Chord());
                 }
                 else {
                     if (mode === 1) {
                         if (array[i] > 4) {
+                            if(noteIndex > 8) continue;
                             let note = new Note();
-                            sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords.length - 1].tempo = array[i];
-                            sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords.length - 1].index = noteIndex;
+                            sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex - 1].tempo = array[i];
+                            sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex - 1].index = noteIndex;
                             note.string = 0;
                             note.fret = 0;
                             note.note = 0;
-                            sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords.length - 1].notes.push(note);
+                            note.active = true;
+                            sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex - 1].notes.push(note);
                         }
                         else {
                             tempo = array[i];
@@ -54,9 +55,11 @@ export default class ReadTabFile {
                         }
                     }
                     else if (mode === 2) {
+                        if(noteIndex > 8) continue;
                         let note = new Note();
-                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords.length - 1].tempo = tempo;
-                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords.length - 1].index = noteIndex;
+                        note.active = true;
+                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex - 1].tempo = tempo;
+                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex - 1].index = noteIndex;
                         if ([69, 65, 68, 71, 66, 101].includes(array[i])) {
                             note.string = array[i];
                             i++;
@@ -96,7 +99,10 @@ export default class ReadTabFile {
                             ["D3", "Eb3", "E3", "F3", "Gb3", "G3", "Ab3", "A3", "Bb3", "B3"],
                             ["A2", "Bb2", "B2", "C3", "Db3", "D3", "Eb3", "E3", "F3", "Gb3"],
                             ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]][note.string][note.fret];
-                            sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords.length - 1].notes.push(note);
+                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex - 1].notes.push(note);
+                        if (tempo === 0 || tempo === 5) noteIndex += 3;
+                        else if (tempo === 1 || tempo === 6) noteIndex += 2;
+                        else if (tempo === 2 || tempo === 7) noteIndex++;
                     }
                 }
             }
