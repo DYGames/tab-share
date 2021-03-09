@@ -27,14 +27,12 @@ export default class SheetPlayer {
                 for (let i = 0; i < sheet.tracks[l].bars.length; i++) {
                     await new Promise((resolve) => {
                         (function chord(j) {
-                            if (!sheet.tracks[l].bars[i].chords[j].active) return;
-
                             if (j >= sheet.tracks[l].bars[i].chords.length) {
                                 resolve(true);
                                 return;
                             }
-                            
-                            if (j === -1) {
+
+                            if (j === -1 || !sheet.tracks[l].bars[i].chords[j].active) {
                                 setTimeout(chord.bind(this), 60000 / sheet.bpm / 4, j + 1);
                                 return;
                             }

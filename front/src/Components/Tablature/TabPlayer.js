@@ -5,7 +5,6 @@ import SheetPlayer from "../../Logic/Tablature/SheetPlayer"
 import ReadTabFile from "../../Logic/Tablature/ReadTabFile"
 import Note from "../../Logic/Tablature/Note";
 import Bar from "../../Logic/Tablature/Bar";
-import Chord from "../../Logic/Tablature/Chord";
 
 export default class TabPlayer extends React.Component {
     constructor(props) {
@@ -50,38 +49,73 @@ export default class TabPlayer extends React.Component {
             this.isEdit = !this.isEdit;
             if (!this.isEdit && this.inputNote !== "") {
                 let bar = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar];
-                if (bar.chords.length === 0) {
+                bar.chords[this.editIndex].tempo = this.currentTempo;
+
+                //tempo에 의한 active 조정 좀더 세밀하게
+                if (this.currentTempo === 0 || this.currentTempo === 5) {
                     for (let i = 0; i < 8; i++) {
-                        bar.chords.push(new Chord(i, 3));
+                        if (i !== this.editIndex) bar.chords[i].active = false;
                     }
                 }
-                //this.editIndex + 1, this.currentTempo, 
-                bar.chords[this.editIndex].notes.push(new Note(this.editString + 1, Number(this.inputNote), [[],
-                ["E4", "F4", "Gb4", "G4", "Ab4", "A4", "Bb4", "B4", "C5", "Cb5"],
-                ["B3", "C4", "Db4", "D4", "Eb4", "E4", "F4", "Gb4", "G4", "Ab5"],
-                ["G3", "Ab3", "A3", "Bb3", "B3", "C4", "Db4", "D4", "Eb4", "E4"],
-                ["D3", "Eb3", "E3", "F3", "Gb3", "G3", "Ab3", "A3", "Bb3", "B3"],
-                ["A2", "Bb2", "B2", "C3", "Db3", "D3", "Eb3", "E3", "F3", "Gb3"],
-                ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]][this.editString + 1][Number(this.inputNote)], true));
+                else if (this.currentTempo === 1 || this.currentTempo === 6) {
+                    bar.chords[this.editIndex + 1].active = false;
+                    bar.chords[this.editIndex + 2].active = false;
+                    bar.chords[this.editIndex + 3].active = false;
+                }
+                else if (this.currentTempo === 2 || this.currentTempo === 7) {
+                    bar.chords[this.editIndex + 1].active = false;
+                }
+                else if (this.currentTempo === 3 || this.currentTempo === 8) {
+                    if (bar.chords[this.editIndex + 1])
+                        bar.chords[this.editIndex + 1].active = true;
+                }
+
+                let note = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords[this.editIndex].getNoteByString(this.editString + 1);
+                if (note !== null) {
+                    note.string = this.editString + 1;
+                    note.fret = Number(this.inputNote);
+                    note.note = [["E4", "F4", "Gb4", "G4", "Ab4", "A4", "Bb4", "B4", "C5", "Cb5"],
+                    ["B3", "C4", "Db4", "D4", "Eb4", "E4", "F4", "Gb4", "G4", "Ab5"],
+                    ["G3", "Ab3", "A3", "Bb3", "B3", "C4", "Db4", "D4", "Eb4", "E4"],
+                    ["D3", "Eb3", "E3", "F3", "Gb3", "G3", "Ab3", "A3", "Bb3", "B3"],
+                    ["A2", "Bb2", "B2", "C3", "Db3", "D3", "Eb3", "E3", "F3", "Gb3"],
+                    ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]][this.editString][Number(this.inputNote)];
+                }
+                else {
+
+                    bar.chords[this.editIndex].notes.push(new Note(this.editString + 1, Number(this.inputNote),
+                        [["E4", "F4", "Gb4", "G4", "Ab4", "A4", "Bb4", "B4", "C5", "Cb5"],
+                        ["B3", "C4", "Db4", "D4", "Eb4", "E4", "F4", "Gb4", "G4", "Ab5"],
+                        ["G3", "Ab3", "A3", "Bb3", "B3", "C4", "Db4", "D4", "Eb4", "E4"],
+                        ["D3", "Eb3", "E3", "F3", "Gb3", "G3", "Ab3", "A3", "Bb3", "B3"],
+                        ["A2", "Bb2", "B2", "C3", "Db3", "D3", "Eb3", "E3", "F3", "Gb3"],
+                        ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]][this.editString][Number(this.inputNote)]));
+                }
                 console.log(this.currentSheet);
                 requestAnimationFrame(this.renderCanvas.bind(this));
                 return;
             }
-            this.inputNote = "";
             var rect = e.target.getBoundingClientRect();
             var x = e.clientX - rect.left;
             var y = e.clientY - rect.top;
             this.editString = (Math.round(y / this.stringBorder) - 1) % 7;
             this.editBar = Math.floor((x - this.barBorder.left) / this.barWidth) + (Math.floor((Math.round(y / this.stringBorder) - 1) / (this.stringCount + 1)) * 4);
             this.editIndex = Math.floor(((x - this.barBorder.left) - (Math.floor((x - this.barBorder.left) / this.barWidth) * this.barWidth)) / (this.barWidth / 8));
+            let note = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords[this.editIndex].getNoteByString(this.editString + 1);
+            if (note !== null) this.inputNote = note.fret;
+            else this.inputNote = "";
             requestAnimationFrame(this.renderCanvas.bind(this));
         });
-        window.onkeypress = (e) => {
+        window.onkeydown = (e) => {
             if (!this.isEdit) return;
-            if (e.keyCode === 127) {
+            if (e.keyCode === 46) {
                 this.isEdit = false;
                 this.inputNote = "";
-                this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords[this.editIndex].notes[this.editString].active = false;
+                let notes = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords[this.editIndex].notes;
+                let note = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords[this.editIndex].getNoteByString(this.editString + 1);
+                notes.splice(notes.indexOf(note), 1);
+                requestAnimationFrame(this.renderCanvas.bind(this));
+                return;
             }
 
             this.inputNote += String.fromCharCode(e.keyCode);
@@ -188,6 +222,11 @@ export default class TabPlayer extends React.Component {
         requestAnimationFrame(this.renderCanvas.bind(this));
     }
 
+    removeBar() {
+        this.currentSheet.tracks[this.currentSheet.currentTrack].bars.splice(this.currentSheet.tracks[this.currentSheet.currentTrack].bars.length - 1, 1);
+        requestAnimationFrame(this.renderCanvas.bind(this));
+    }
+
     render() {
         const Cell = styled.td`
             border: 1px solid #f6f8fa;
@@ -247,7 +286,15 @@ export default class TabPlayer extends React.Component {
                                                 <button onClick={this.addBar.bind(this)}>
                                                     <div>
                                                         <img src={logo} alt=""></img>
-                                                        <span>Add Bar</span>
+                                                        <span>마디 추가</span>
+                                                    </div>
+                                                </button>
+                                            </Cell>
+                                            <Cell>
+                                                <button onClick={this.removeBar.bind(this)}>
+                                                    <div>
+                                                        <img src={logo} alt=""></img>
+                                                        <span>마디 삭제</span>
                                                     </div>
                                                 </button>
                                             </Cell>
@@ -276,6 +323,7 @@ export default class TabPlayer extends React.Component {
                                 <button onClick={this.loadPlugin.bind(this, "acoustic_grand_piano", 2)}>{this.state.loadedPluginIndex === 2 ? "Plugin Loaded" : "piano"}</button>
                                 <button onClick={this.loadSheet.bind(this, `${process.env.REACT_APP_BACKEND_HOST}/public/tab.tab`)}>Load Sheet1</button>
                                 <button onClick={this.loadSheet.bind(this, `${process.env.REACT_APP_BACKEND_HOST}/public/stair.tab`)}>Load Sheet2</button>
+                                <button onClick={this.loadSheet.bind(this, `${process.env.REACT_APP_BACKEND_HOST}/public/test.tab`)}>Load Sheet3</button>
                                 <button onClick={this.play.bind(this)}>Play</button>
                                 <button onClick={this.pause.bind(this)}>Pause</button>
                                 <button onClick={this.stop.bind(this)}>Stop</button>

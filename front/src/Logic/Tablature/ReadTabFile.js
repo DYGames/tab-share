@@ -13,7 +13,7 @@ export default class ReadTabFile {
         }).then((response) => { return response.arrayBuffer(); }).then((response) => {
             const array = Array.from(new Uint8Array(response));
             let mode = 0;
-            let tempo = 0;
+            let tempo = 3;
             let noteIndex = -1;
             let barIndex = 0;
             let trackIndex = 0;
@@ -34,12 +34,26 @@ export default class ReadTabFile {
                 else if (array[i] === 127) {
                     mode = 1;
                     string = 1;
-                    noteIndex++;
+                    if (tempo === 0 || tempo === 5) {
+                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex].active = false;
+                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex + 1].active = false;
+                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex + 2].active = false;
+                        noteIndex += 4;
+                    }
+                    else if (tempo === 1 || tempo === 6) {
+                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex].active = false;
+                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex + 1].active = false;
+                        noteIndex += 3;
+                    }
+                    else if (tempo === 2 || tempo === 7) {
+                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex].active = false;
+                        noteIndex += 2;
+                    }
+                    else if (tempo === 3 || tempo === 8) noteIndex++;
                 }
                 else {
                     if (mode === 1) {
                         if (array[i] > 4) {
-                            if(noteIndex > 8) continue;
                             let note = new Note();
                             sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex - 1].tempo = array[i];
                             sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex - 1].index = noteIndex;
@@ -48,6 +62,7 @@ export default class ReadTabFile {
                             note.note = 0;
                             note.active = true;
                             sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex - 1].notes.push(note);
+                            tempo = array[i];
                         }
                         else {
                             tempo = array[i];
@@ -55,41 +70,19 @@ export default class ReadTabFile {
                         }
                     }
                     else if (mode === 2) {
-                        if(noteIndex > 8) continue;
                         let note = new Note();
                         note.active = true;
                         sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex - 1].tempo = tempo;
                         sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex - 1].index = noteIndex;
-                        if ([69, 65, 68, 71, 66, 101].includes(array[i])) {
-                            note.string = array[i];
+                        let strings = [69, 65, 68, 71, 66, 101];
+                        if (strings.includes(array[i])) {
+                            note.string = 6 - strings.indexOf(array[i]);
                             i++;
                             note.fret = array[i];
                         } else {
                             note.string = string;
                             note.fret = array[i];
                             string++;
-                        }
-                        switch (note.string) {
-                            case 69:
-                                note.string = 6;
-                                break;
-                            case 65:
-                                note.string = 5;
-                                break;
-                            case 68:
-                                note.string = 4;
-                                break;
-                            case 71:
-                                note.string = 3;
-                                break;
-                            case 66:
-                                note.string = 2;
-                                break;
-                            case 101:
-                                note.string = 1;
-                                break;
-                            default:
-                                break;
                         }
                         if (note.fret !== 110 && note.fret !== 120)
                             note.note = [[],
@@ -100,9 +93,6 @@ export default class ReadTabFile {
                             ["A2", "Bb2", "B2", "C3", "Db3", "D3", "Eb3", "E3", "F3", "Gb3"],
                             ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]][note.string][note.fret];
                         sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex - 1].notes.push(note);
-                        if (tempo === 0 || tempo === 5) noteIndex += 3;
-                        else if (tempo === 1 || tempo === 6) noteIndex += 2;
-                        else if (tempo === 2 || tempo === 7) noteIndex++;
                     }
                 }
             }

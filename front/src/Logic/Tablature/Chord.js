@@ -21,4 +21,12 @@ export default class Chord {
         sender.ctx.fillText(`${["w", "h", "q", "e", "s", "wr", "hr", "qr", "er", "sr"][this.tempo]}`, delta, (Math.floor(index / 4) * (sender.stringBorder * (sender.stringCount + 1))) + sender.stringBorder * (sender.stringCount + 1));
 
     }
+
+    getNoteByString(string) {
+        for (let i = 0; i < this.notes.length; i++) {
+            if (this.notes[i].string === string)
+                return this.notes[i];
+        }
+        return null;
+    }
 }
