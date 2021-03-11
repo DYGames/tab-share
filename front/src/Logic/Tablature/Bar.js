@@ -9,6 +9,37 @@ export default class Bar {
         }
     }
 
+    recalc() {
+        let j = 0, tempo = 0;
+
+        for (j = 0; j < 8; j++) {
+            if (!this.chords[j].active)
+                continue;
+            let t = this.chords[j].tempo;
+            if (t === 0 || t === 5)
+                tempo += 4;
+            else if (t === 1 || t === 6)
+                tempo += 2;
+            else if (t === 2 || t === 7)
+                tempo += 1;
+            else if (t === 3 || t === 8)
+                tempo += 0.5;
+            else if (t === 4 || t === 9)
+                tempo += 0.25;
+        }
+
+        j = 0;
+        while (tempo < 4 || j < 8) {
+            if (!this.chords[j].active) {
+                j++;
+                continue;
+            }
+            this.chords[j].active = true;
+            tempo += this.chords[j].tempo;
+            j++;
+        }
+    }
+
     render(sender) {
         this.renderString(sender, this.index);
         this.renderBarFrame(sender, this.index);

@@ -46,30 +46,13 @@ export default class TabPlayer extends React.Component {
         this.ctx = this.playerRef.current.getContext('2d');
         this.ctx.font = '10pt Consolas';
         this.playerRef.current.addEventListener("click", (e) => {
+            if (this.currentSheet === null)
+                return;
             this.isEdit = !this.isEdit;
             if (!this.isEdit && this.inputNote !== "") {
                 let bar = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar];
                 bar.chords[this.editIndex].tempo = this.currentTempo;
-
-                //tempo에 의한 active 조정 좀더 세밀하게
-                if (this.currentTempo === 0 || this.currentTempo === 5) {
-                    for (let i = 0; i < 8; i++) {
-                        if (i !== this.editIndex) bar.chords[i].active = false;
-                    }
-                }
-                else if (this.currentTempo === 1 || this.currentTempo === 6) {
-                    bar.chords[this.editIndex + 1].active = false;
-                    bar.chords[this.editIndex + 2].active = false;
-                    bar.chords[this.editIndex + 3].active = false;
-                }
-                else if (this.currentTempo === 2 || this.currentTempo === 7) {
-                    bar.chords[this.editIndex + 1].active = false;
-                }
-                else if (this.currentTempo === 3 || this.currentTempo === 8) {
-                    if (bar.chords[this.editIndex + 1])
-                        bar.chords[this.editIndex + 1].active = true;
-                }
-
+                bar.recalc();
                 let note = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords[this.editIndex].getNoteByString(this.editString + 1);
                 if (note !== null) {
                     note.string = this.editString + 1;
@@ -82,7 +65,6 @@ export default class TabPlayer extends React.Component {
                     ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]][this.editString][Number(this.inputNote)];
                 }
                 else {
-
                     bar.chords[this.editIndex].notes.push(new Note(this.editString + 1, Number(this.inputNote),
                         [["E4", "F4", "Gb4", "G4", "Ab4", "A4", "Bb4", "B4", "C5", "Cb5"],
                         ["B3", "C4", "Db4", "D4", "Eb4", "E4", "F4", "Gb4", "G4", "Ab5"],
@@ -101,9 +83,16 @@ export default class TabPlayer extends React.Component {
             this.editString = (Math.round(y / this.stringBorder) - 1) % 7;
             this.editBar = Math.floor((x - this.barBorder.left) / this.barWidth) + (Math.floor((Math.round(y / this.stringBorder) - 1) / (this.stringCount + 1)) * 4);
             this.editIndex = Math.floor(((x - this.barBorder.left) - (Math.floor((x - this.barBorder.left) / this.barWidth) * this.barWidth)) / (this.barWidth / 8));
+            if (this.editBar >= this.currentSheet.tracks[this.currentSheet.currentTrack].bars.length) {
+                this.inputNote = "";
+                this.isEdit = false;
+                return;
+            }
             let note = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords[this.editIndex].getNoteByString(this.editString + 1);
-            if (note !== null) this.inputNote = note.fret;
-            else this.inputNote = "";
+            if (note !== null) this.inputNote = String(note.fret);
+            else {
+                this.inputNote = ""
+            };
             requestAnimationFrame(this.renderCanvas.bind(this));
         });
         window.onkeydown = (e) => {
@@ -114,11 +103,18 @@ export default class TabPlayer extends React.Component {
                 let notes = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords[this.editIndex].notes;
                 let note = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords[this.editIndex].getNoteByString(this.editString + 1);
                 notes.splice(notes.indexOf(note), 1);
+                if (notes.length === 0) {
+                    this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords[this.editIndex].tempo = 3;
+                    this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].recalc();
+                }
                 requestAnimationFrame(this.renderCanvas.bind(this));
                 return;
+            } else if (e.keyCode === 8) {
+                this.inputNote = this.inputNote.substr(0, this.inputNote.length - 1);
+            } else {
+                this.inputNote += String.fromCharCode(e.keyCode);
             }
 
-            this.inputNote += String.fromCharCode(e.keyCode);
             requestAnimationFrame(this.renderCanvas.bind(this));
         };
         this.renderCanvas();
@@ -275,6 +271,13 @@ export default class TabPlayer extends React.Component {
         return (
             <table style={{ height: "1px" }}>
                 <tbody>
+                    <tr>
+                        <td>
+                        </td>
+                        <td>
+
+                        </td>
+                    </tr>
                     <tr>
                         <td>
                             <div style={{ float: "left", width: "140px", height: "100%" }}>
