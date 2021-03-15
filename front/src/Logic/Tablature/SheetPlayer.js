@@ -37,15 +37,9 @@ export default class SheetPlayer {
                                 return;
                             }
 
-                            let tempo = 0;
                             let delay = 0;
                             for (let k = 0; k < sheet.tracks[l].bars[i].chords[j].notes.length; k++) {
-                                tempo = sheet.tracks[l].bars[i].chords[j].tempo;
-                                if (tempo === 0 || tempo === 5) delay = (60000 / sheet.bpm) * 4;
-                                else if (tempo === 1 || tempo === 6) delay = (60000 / sheet.bpm) * 2;
-                                else if (tempo === 2 || tempo === 7) delay = 60000 / sheet.bpm;
-                                else if (tempo === 3 || tempo === 8) delay = 60000 / sheet.bpm / 2;
-                                else if (tempo === 4 || tempo === 9) delay = 60000 / sheet.bpm / 4;
+                                delay = (60000 / sheet.bpm) * (Math.pow(2, (4 - (sheet.tracks[l].bars[i].chords[j].tempo % 5))) / 4);
                                 this.playNote(sheet.tracks[l].bars[i].chords[j].notes[k].note, chan, delay);
                             }
                             setTimeout(chord.bind(this), delay, j + 1);

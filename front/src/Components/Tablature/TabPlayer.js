@@ -51,30 +51,24 @@ export default class TabPlayer extends React.Component {
                 return;
             this.isEdit = !this.isEdit;
             if (!this.isEdit && this.inputNote !== "") {
+                let notes = [["E4", "F4", "Gb4", "G4", "Ab4", "A4", "Bb4", "B4", "C5", "Cb5"],
+                ["B3", "C4", "Db4", "D4", "Eb4", "E4", "F4", "Gb4", "G4", "Ab5"],
+                ["G3", "Ab3", "A3", "Bb3", "B3", "C4", "Db4", "D4", "Eb4", "E4"],
+                ["D3", "Eb3", "E3", "F3", "Gb3", "G3", "Ab3", "A3", "Bb3", "B3"],
+                ["A2", "Bb2", "B2", "C3", "Db3", "D3", "Eb3", "E3", "F3", "Gb3"],
+                ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]];
                 let bar = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar];
                 bar.chords[this.editIndex].tempo = this.currentTempo;
-                bar.recalc();
                 let note = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords[this.editIndex].getNoteByString(this.editString + 1);
                 if (note !== null) {
                     note.string = this.editString + 1;
                     note.fret = Number(this.inputNote);
-                    note.note = [["E4", "F4", "Gb4", "G4", "Ab4", "A4", "Bb4", "B4", "C5", "Cb5"],
-                    ["B3", "C4", "Db4", "D4", "Eb4", "E4", "F4", "Gb4", "G4", "Ab5"],
-                    ["G3", "Ab3", "A3", "Bb3", "B3", "C4", "Db4", "D4", "Eb4", "E4"],
-                    ["D3", "Eb3", "E3", "F3", "Gb3", "G3", "Ab3", "A3", "Bb3", "B3"],
-                    ["A2", "Bb2", "B2", "C3", "Db3", "D3", "Eb3", "E3", "F3", "Gb3"],
-                    ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]][this.editString][Number(this.inputNote)];
+                    note.note = notes[this.editString][Number(this.inputNote)];
                 }
                 else {
-                    bar.chords[this.editIndex].notes.push(new Note(this.editString + 1, Number(this.inputNote),
-                        [["E4", "F4", "Gb4", "G4", "Ab4", "A4", "Bb4", "B4", "C5", "Cb5"],
-                        ["B3", "C4", "Db4", "D4", "Eb4", "E4", "F4", "Gb4", "G4", "Ab5"],
-                        ["G3", "Ab3", "A3", "Bb3", "B3", "C4", "Db4", "D4", "Eb4", "E4"],
-                        ["D3", "Eb3", "E3", "F3", "Gb3", "G3", "Ab3", "A3", "Bb3", "B3"],
-                        ["A2", "Bb2", "B2", "C3", "Db3", "D3", "Eb3", "E3", "F3", "Gb3"],
-                        ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]][this.editString][Number(this.inputNote)]));
+                    bar.chords[this.editIndex].notes.push(new Note(this.editString + 1, Number(this.inputNote), notes[this.editString][Number(this.inputNote)]));
                 }
-                if(this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords.length - 1 === this.editIndex) {
+                if (this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords.length - 1 === this.editIndex) {
                     this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords.push(new Chord(this.editIndex, 3, true));
                 }
                 console.log(this.currentSheet);
@@ -82,22 +76,23 @@ export default class TabPlayer extends React.Component {
                 return;
             }
             var rect = e.target.getBoundingClientRect();
-            var x = e.clientX - rect.left;
-            var y = e.clientY - rect.top;
-            this.editString = (Math.round(y / this.stringBorder) - 1) % 7;
-            this.editBar = Math.floor((x - this.barBorder.left) / this.barWidth) + (Math.floor((Math.round(y / this.stringBorder) - 1) / (this.stringCount + 1)) * 4);
-            this.editIndex = Math.floor(((x - this.barBorder.left) - (Math.floor((x - this.barBorder.left) / this.barWidth) * this.barWidth)) / (this.barWidth / 8));
-            if (this.editBar >= this.currentSheet.tracks[this.currentSheet.currentTrack].bars.length) {
-                this.inputNote = "";
-                this.isEdit = false;
-                return;
+            var x = e.clientX - rect.left, y = e.clientY - rect.top;
+            for (let i = 0; i < this.currentSheet.tracks[this.currentSheet.currentTrack].bars.length; i++) {
+                for (let j = 0; j < this.currentSheet.tracks[this.currentSheet.currentTrack].bars[i].chords.length; j++) {
+                    for (let k = 0; k < this.currentSheet.tracks[this.currentSheet.currentTrack].bars[i].chords[j].notes.length; k++) {
+                        let note = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[i].chords[j].notes[k];
+                        let rect = note.rect;
+                        if (rect.left < x && rect.left + rect.width > x && rect.top < y && rect.top + rect.height > y) {
+                            this.inputNote = String(note.fret);
+                            this.editString = note.string - 1;
+                            this.editBar = i;
+                            this.editIndex = j;
+                            requestAnimationFrame(this.renderCanvas.bind(this));
+                            return;
+                        }
+                    }
+                }
             }
-            let note = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords[this.editIndex].getNoteByString(this.editString + 1);
-            if (note !== null) this.inputNote = String(note.fret);
-            else {
-                this.inputNote = ""
-            };
-            requestAnimationFrame(this.renderCanvas.bind(this));
         });
         window.onkeydown = (e) => {
             if (!this.isEdit) return;
