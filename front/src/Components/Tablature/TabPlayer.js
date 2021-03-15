@@ -5,6 +5,7 @@ import SheetPlayer from "../../Logic/Tablature/SheetPlayer"
 import ReadTabFile from "../../Logic/Tablature/ReadTabFile"
 import Note from "../../Logic/Tablature/Note";
 import Bar from "../../Logic/Tablature/Bar";
+import Chord from "../../Logic/Tablature/Chord";
 
 export default class TabPlayer extends React.Component {
     constructor(props) {
@@ -72,6 +73,9 @@ export default class TabPlayer extends React.Component {
                         ["D3", "Eb3", "E3", "F3", "Gb3", "G3", "Ab3", "A3", "Bb3", "B3"],
                         ["A2", "Bb2", "B2", "C3", "Db3", "D3", "Eb3", "E3", "F3", "Gb3"],
                         ["E2", "F2", "Gb2", "G2", "Ab2", "A2", "Bb2", "B2", "C3", "Db3"]][this.editString][Number(this.inputNote)]));
+                }
+                if(this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords.length - 1 === this.editIndex) {
+                    this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords.push(new Chord(this.editIndex, 3, true));
                 }
                 console.log(this.currentSheet);
                 requestAnimationFrame(this.renderCanvas.bind(this));
@@ -229,26 +233,34 @@ export default class TabPlayer extends React.Component {
             border-radius: 6px;
             padding: 0 0 0 0;
         `;
+
+        const Button = styled.button`
+            width: 64px;
+            height: 64px;
+        `;
+        const ButtonDesc = styled.span`
+            font-size: 8pt;
+        `;
         let noteButtons = [];
         let noteIds = ["온음표", "2분음표", "4분음표", "8분음표", "16분음표", "온쉼표", "2분쉼표", "4분쉼표", "8분쉼표", "16분쉼표"];
         for (let i = 0; i < noteIds.length; i += 2) {
             noteButtons.push(
                 <tr key={i}>
                     <Cell>
-                        <button onClick={this.changeNote.bind(this, i)}>
+                        <Button onClick={this.changeNote.bind(this, i)}>
                             <div>
                                 <img src={logo} alt=""></img>
-                                <span>{noteIds[i]}</span>
+                                <ButtonDesc>{noteIds[i]}</ButtonDesc>
                             </div>
-                        </button>
+                        </Button>
                     </Cell>
                     <Cell>
-                        <button onClick={this.changeNote.bind(this, i + 1)}>
+                        <Button onClick={this.changeNote.bind(this, i + 1)}>
                             <div>
                                 <img src={logo} alt=""></img>
-                                <span>{noteIds[i + 1]}</span>
+                                <ButtonDesc>{noteIds[i + 1]}</ButtonDesc>
                             </div>
-                        </button>
+                        </Button>
                     </Cell>
                 </tr>);
         }
@@ -258,12 +270,12 @@ export default class TabPlayer extends React.Component {
                 trackButtons.push(
                     <tr key={i}>
                         <Cell>
-                            <button onClick={this.changeTrack.bind(this, i)}>
+                            <Button onClick={this.changeTrack.bind(this, i)}>
                                 <div>
                                     <img src={logo} alt=""></img>
-                                    <span>Guitar {i + 1}</span>
+                                    <ButtonDesc>Guitar {i + 1}</ButtonDesc>
                                 </div>
-                            </button>
+                            </Button>
                         </Cell>
                     </tr>);
             }
@@ -275,38 +287,37 @@ export default class TabPlayer extends React.Component {
                         <td>
                         </td>
                         <td>
-
                         </td>
                     </tr>
                     <tr>
                         <td>
                             <div style={{ float: "left", width: "140px", height: "100%" }}>
-                                <table style={{ borderColor: "transparent" }}>
+                                <table style={{ tableLayout: "fixed" }}>
                                     <tbody>
                                         {noteButtons}
                                         <tr>
                                             <Cell>
-                                                <button onClick={this.addBar.bind(this)}>
+                                                <Button onClick={this.addBar.bind(this)}>
                                                     <div>
                                                         <img src={logo} alt=""></img>
-                                                        <span>마디 추가</span>
+                                                        <ButtonDesc>마디 추가</ButtonDesc>
                                                     </div>
-                                                </button>
+                                                </Button>
                                             </Cell>
                                             <Cell>
-                                                <button onClick={this.removeBar.bind(this)}>
+                                                <Button onClick={this.removeBar.bind(this)}>
                                                     <div>
                                                         <img src={logo} alt=""></img>
-                                                        <span>마디 삭제</span>
+                                                        <ButtonDesc>마디 삭제</ButtonDesc>
                                                     </div>
-                                                </button>
+                                                </Button>
                                             </Cell>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                             <div style={{ float: "left", height: "100%" }}>
-                                <table style={{ borderColor: "transparent" }}>
+                                <table style={{ tableLayout: "fixed" }}>
                                     <tbody>
                                         {trackButtons}
                                     </tbody>

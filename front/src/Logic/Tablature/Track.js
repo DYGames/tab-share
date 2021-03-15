@@ -5,8 +5,10 @@ export default class Track {
     }
 
     render(sender) {
+        let left = sender.barBorder.left;
         for (let i = 0; i < this.bars.length; i++) {
-            this.bars[i].render(sender);
+            this.bars[i].render(sender, left);
+            left += this.bars[i].width;
         }
     }
 }

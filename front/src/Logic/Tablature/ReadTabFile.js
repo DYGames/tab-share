@@ -3,6 +3,7 @@ import Bar from "./Bar"
 import Note from "./Note"
 import "whatwg-fetch"
 import Track from "./Track";
+import Chord from "./Chord";
 
 export default class ReadTabFile {
     static async read(path) {
@@ -32,24 +33,10 @@ export default class ReadTabFile {
                     barIndex++;
                 }
                 else if (array[i] === 127) {
+                    sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords.push(new Chord(noteIndex, 3, true))
                     mode = 1;
                     string = 1;
-                    if (tempo === 0 || tempo === 5) {
-                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex].active = false;
-                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex + 1].active = false;
-                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex + 2].active = false;
-                        noteIndex += 4;
-                    }
-                    else if (tempo === 1 || tempo === 6) {
-                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex].active = false;
-                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex + 1].active = false;
-                        noteIndex += 3;
-                    }
-                    else if (tempo === 2 || tempo === 7) {
-                        sheet.tracks[trackIndex - 1].bars[barIndex - 1].chords[noteIndex].active = false;
-                        noteIndex += 2;
-                    }
-                    else if (tempo === 3 || tempo === 8) noteIndex++;
+                    noteIndex++;
                 }
                 else {
                     if (mode === 1) {

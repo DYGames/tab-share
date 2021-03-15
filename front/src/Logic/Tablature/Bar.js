@@ -4,80 +4,48 @@ export default class Bar {
     constructor(index) {
         this.index = index;
         this.chords = [];
-        for (let j = 0; j < 8; j++) {
-            this.chords.push(new Chord(j, 3, true));
-        }
+        this.width = 0;
     }
 
     recalc() {
-        let j = 0, tempo = 0;
-
-        for (j = 0; j < 8; j++) {
-            if (!this.chords[j].active)
-                continue;
-            let t = this.chords[j].tempo;
-            if (t === 0 || t === 5)
-                tempo += 4;
-            else if (t === 1 || t === 6)
-                tempo += 2;
-            else if (t === 2 || t === 7)
-                tempo += 1;
-            else if (t === 3 || t === 8)
-                tempo += 0.5;
-            else if (t === 4 || t === 9)
-                tempo += 0.25;
-        }
-
-        j = 0;
-        while (tempo < 4 || j < 8) {
-            if (!this.chords[j].active) {
-                j++;
-                continue;
-            }
-            this.chords[j].active = true;
-            tempo += this.chords[j].tempo;
-            j++;
-        }
     }
 
-    render(sender) {
-        this.renderString(sender, this.index);
-        this.renderBarFrame(sender, this.index);
-        let delta = (sender.barWidth * (this.index % 4)) + (sender.barWidth / 16) + sender.barBorder.left;
+    render(sender, left) {
+        this.width = sender.barWidth / 8;
+
+        for (let i = 0; i < this.chords.length; i++) {
+            this.width += sender.barWidth / Math.pow(2, this.chords[i].tempo % 5);
+        }
+
+        this.renderString(sender, this.index, left);
+        this.renderBarFrame(sender, this.index, left);
+        let delta = left + sender.barWidth / 8;
         for (let i = 0; i < this.chords.length; i++) {
             if (!this.chords[i].active) continue;
             this.chords[i].render(sender, this.index, delta);
-            let tempo = this.chords[i].tempo;
-            if (tempo === 0 || tempo === 5)
-                delta += sender.barWidth / 1;
-            else if (tempo === 1 || tempo === 6)
-                delta += sender.barWidth / 2;
-            else if (tempo === 2 || tempo === 7)
-                delta += sender.barWidth / 4;
-            else if (tempo === 3 || tempo === 8)
-                delta += sender.barWidth / 8;
-            else if (tempo === 4 || tempo === 9)
-                delta += sender.barWidth / 16;
+            delta += sender.barWidth / Math.pow(2, this.chords[i].tempo % 5);
         }
     }
 
-    renderString(sender, idx) {
+    renderString(sender, idx, left) {
         sender.ctx.strokeStyle = '#000000';
         sender.ctx.beginPath();
         for (let i = 0; i < sender.stringCount; i++) {
-            sender.ctx.moveTo(sender.barBorder.left + (sender.barWidth * ((idx % 4))), (Math.floor(idx / 4) * (sender.stringBorder * (sender.stringCount + 1))) + (sender.stringBorder * (i + 1)));
-            sender.ctx.lineTo(sender.barBorder.left + (sender.barWidth * ((idx % 4) + 1)), (Math.floor(idx / 4) * (sender.stringBorder * (sender.stringCount + 1))) + (sender.stringBorder * (i + 1)));
+            sender.ctx.moveTo(left, (Math.floor(idx / 4) * (sender.stringBorder * (sender.stringCount + 1))) + (sender.stringBorder * (i + 1)));
+            sender.ctx.lineTo(left + this.width, (Math.floor(idx / 4) * (sender.stringBorder * (sender.stringCount + 1))) + (sender.stringBorder * (i + 1)));
         }
         sender.ctx.closePath();
         sender.ctx.stroke();
     }
 
-    renderBarFrame(sender, idx) {
+    renderBarFrame(sender, idx, left) {
+        let top = (Math.floor(idx / 4) * (sender.stringBorder * (sender.stringCount + 1))) + sender.barBorder.top;
+
         sender.ctx.beginPath();
-        sender.ctx.moveTo(sender.barBorder.left + (sender.barWidth * ((idx % 4))), (Math.floor(idx / 4) * (sender.stringBorder * (sender.stringCount + 1))) + sender.barBorder.top);
-        sender.ctx.lineTo(sender.barBorder.left + (sender.barWidth * ((idx % 4))), (Math.floor(idx / 4) * (sender.stringBorder * (sender.stringCount + 1))) + sender.stringBorder * sender.stringCount);
-        sender.ctx.moveTo(sender.barBorder.left + (sender.barWidth * ((idx % 4) + 1)), (Math.floor(idx / 4) * (sender.stringBorder * (sender.stringCount + 1))) + sender.barBorder.top);
-        sender.ctx.lineTo(sender.barBorder.left + (sender.barWidth * ((idx % 4) + 1)), (Math.floor(idx / 4) * (sender.stringBorder * (sender.stringCount + 1))) + sender.stringBorder * sender.stringCount);
+        sender.ctx.moveTo(left, top);
+        sender.ctx.lineTo(left, (Math.floor(idx / 4) * (sender.stringBorder * (sender.stringCount + 1))) + sender.stringBorder * sender.stringCount);
+        sender.ctx.moveTo(left + this.width, top);
+        sender.ctx.lineTo(left + this.width, (Math.floor(idx / 4) * (sender.stringBorder * (sender.stringCount + 1))) + sender.stringBorder * sender.stringCount);
         sender.ctx.closePath();
         sender.ctx.stroke();
     }
