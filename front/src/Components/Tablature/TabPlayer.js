@@ -38,9 +38,10 @@ export default class TabPlayer extends React.Component {
         this.progress = 0;
         this.progressInterval = null;
         this.currentChannel = 0;
-        this.currentTempo = 0;
+        this.currentTempo = 3;
         this.isEdit = false;
         this.inputNote = "";
+        this.editRect = null;
     }
 
     componentDidMount() {
@@ -49,8 +50,7 @@ export default class TabPlayer extends React.Component {
         this.playerRef.current.addEventListener("click", (e) => {
             if (this.currentSheet === null)
                 return;
-            this.isEdit = !this.isEdit;
-            if (!this.isEdit && this.inputNote !== "") {
+            if (this.isEdit && this.inputNote !== "") {
                 let notes = [["E4", "F4", "Gb4", "G4", "Ab4", "A4", "Bb4", "B4", "C5", "Cb5"],
                 ["B3", "C4", "Db4", "D4", "Eb4", "E4", "F4", "Gb4", "G4", "Ab5"],
                 ["G3", "Ab3", "A3", "Bb3", "B3", "C4", "Db4", "D4", "Eb4", "E4"],
@@ -71,6 +71,7 @@ export default class TabPlayer extends React.Component {
                 if (this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords.length - 1 === this.editIndex) {
                     this.currentSheet.tracks[this.currentSheet.currentTrack].bars[this.editBar].chords.push(new Chord(this.editIndex, 3, true));
                 }
+                this.isEdit = false;
                 console.log(this.currentSheet);
                 requestAnimationFrame(this.renderCanvas.bind(this));
                 return;
@@ -84,9 +85,12 @@ export default class TabPlayer extends React.Component {
                         let rect = note.rect;
                         if (rect.left < x && rect.left + rect.width > x && rect.top < y && rect.top + rect.height > y) {
                             this.inputNote = String(note.fret);
+                            this.currentTempo = this.currentSheet.tracks[this.currentSheet.currentTrack].bars[i].chords[j].tempo;
                             this.editString = note.string - 1;
                             this.editBar = i;
                             this.editIndex = j;
+                            this.editRect = rect;
+                            this.isEdit = true;
                             requestAnimationFrame(this.renderCanvas.bind(this));
                             return;
                         }
@@ -132,13 +136,12 @@ export default class TabPlayer extends React.Component {
     }
 
     renderEditor() {
-        let delta = (this.barWidth * (this.editBar % 4)) + (this.barWidth / 16) + this.barBorder.left + (this.editIndex * (this.barWidth / 8));
         this.ctx.fillStyle = '#000000';
-        this.ctx.fillRect(delta - 1, (Math.floor(this.editBar / 4) * (this.stringBorder * (this.stringCount + 1))) + (this.stringBorder * (this.editString + 1)) - 9, 18, 18);
+        this.ctx.fillRect(this.editRect.left - 1, this.editRect.top - 1, 18, 18);
         this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.fillRect(delta, (Math.floor(this.editBar / 4) * (this.stringBorder * (this.stringCount + 1))) + (this.stringBorder * (this.editString + 1)) - 8, 16, 16);
+        this.ctx.fillRect(this.editRect.left, this.editRect.top, 16, 16);
         this.ctx.fillStyle = '#000000';
-        this.ctx.fillText(`${this.inputNote}`, delta, (Math.floor(this.editBar / 4) * (this.stringBorder * (this.stringCount + 1))) + (this.stringBorder * (this.editString + 1)) + 4);
+        this.ctx.fillText(`${this.inputNote}`, this.editRect.left, this.editRect.top);
     }
 
     renderProgressBar(x) {
